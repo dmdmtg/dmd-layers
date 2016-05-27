@@ -1,0 +1,73 @@
+# ATT 630 MTG DMD
+dmd630|att630|ATT630|630DMD|630dmd|630MTG|AT&T 630 windowing terminal:\
+	:am:da:db:ms:bs:co#80:it#8:li#60:lm#0:\
+	:up=\E[A:do=\E[B:nd=\E[C:le=\b:UP=\E[%dA:DO=\E[%dB:RI=\E[%dC:\
+	:LE=\E[%dD:cm=\E[%i%d;%dH:ho=\E[H:bt=\E[Z:\
+	:sf=\ED:sr=\EM:SF=\E[%dS:SR=\E[%dT:\
+	:us=\E[4m:ue=\E[m:so=\E[7m:se=\E[m:mr=\E[7m:mh=\E[2m:mb=\E[5m:\
+	:me=\E[m:\
+	:ce=\E[K:cd=\E[J:cl=\E[H\E[J:\
+	:dc=\E[P:dl=\E[M:al=\E[L:DC=\E[%dP:DL=\E[%dM:AL=\E[%dL:\
+	:ic=\E[@:IC=\E[%d@:\
+	:sc=\E7:rc=\E8:is=\E[m:rs=\Ec:\
+	:pf=\E[?4i:po=\E[?5i:\
+	:kb=\b:kC=\E[2J:kh=\E[H:ku=\E[A:kd=\E[B:kr=\E[C:kl=\E[D:\
+	:k0=\ENo:k1=\ENp:k2=\ENq:k3=\ENr:k4=\ENs:k5=\ENt:\
+	:kn#6:l0=F9:l1=F10:l2=F11:l3=F12:l4=F13:l5=F14:\
+	:bl=^G:cr=^M:ta=^I:vt#3:xo:pt:
+dmd630-24|att630-24|ATT630-24|630DMD-24|630MTG-24|AT&T 630 windowing terminal 24 lines:\
+	:li#24:tc=dmd630:
+730|att730|730MTG|AT&T 730 windowing terminal:\
+	:am:da:db:es:hs:mi:ms:xn:xo:bs:pt:\
+	:co#80:li#60:kn#6:\
+	:AL=\E[%dL:DC=\E[%dP:DL=\E[%dM:DO=\E[%dB:IC=\E[%d@:\
+	:LE=\E[%dD:RI=\E[%dC:UP=\E[%dA:ae=^O:al=\E[L:as=^N:\
+	:bt=\E[Z:cd=\E[J:ce=\E[K:cl=\E[H\E[J:cm=\E[%i%d;%dH:\
+	:cs=\E[%i%d;%dr:dc=\E[P:dl=\E[M:ei=\E[4l:fs=\E8:\
+	:ho=\E[H:\
+	:i1=\E[8;0|\E[?3;4;5;13;15l\E[13;20l\E[?7h\E[12h\E(B\E)B:\
+	:im=\E[4h:is=\E[0m^O:k1=\EOc:k2=\EOd:k3=\EOe:k4=\EOf:\
+	:k5=\EOg:k6=\EOh:k7=\EOi:k8=\EOj:k9=\ENo:kb=\b:\
+	:kd=\E[B:kh=\E[H:kl=\E[D:kr=\E[C:ku=\E[A:nd=\E[C:\
+	:r2=\Ec\E[?3l:rc=\E8:sc=\E7:se=\E[27m:so=\E[7m:sr=\EM:\
+	:ts=\E7\E[;%i%dx:ue=\E[24m:up=\E[A:us=\E[4m:\
+	:vb=200\E[?5h\E[?5l:ve=\E[?25h\E[?12l:vi=\E[?25l:\
+	:vs=\E[?12;25h:nl=\E[B:ko=bt,do,nd,up,ho,al:
+730-41|att730-41|730MTG-41|AT&T 730-41 windowing terminal:\
+	:li#41:tc=730:
+730-24|att730-24|730MTG-24|AT&T 730-24 windowing terminal:\
+	:li#24:tc=730:
+730r|att730r|730MTGr|AT&T 730 rev video windowing terminal:\
+	:i1=\E[8;0|\E[?3;4;13;15l\E[?5h\E[13;20l\E[?7h\E[12h\E(B\E)B:tc=730:
+730r-41|att730r-41|730MTG-41r|AT&T 730r-41 rev video windowing terminal:\
+	:li#41:tc=730r:
+730r-24|att730r-24|730MTGr-24|AT&T 730r-24 rev video windowing terminal:\
+	:li#24:tc=730r:
+730R2|730+|att730R2|730MTGR2|AT&T 730+ and 730R2 windowing terminal:\
+	:am:da:db:es:hs:mi:ms:xn:xo:bs:pt:\
+	:co#80:li#60:kn#6:\
+	:AL=\E[%dL:DC=\E[%dP:DL=\E[%dM:DO=\E[%dB:IC=\E[%d@:\
+	:LE=\E[%dD:RI=\E[%dC:UP=\E[%dA:ae=^O:al=\E[L:as=^N:\
+	:bt=\E[Z:cd=\E[J:ce=\E[K:cl=\E[H\E[J:cm=\E[%i%d;%dH:\
+	:cs=\E[%i%d;%dr:dc=\E[P:dl=\E[M:ei=\E[4l:fs=\E8:\
+	:ho=\E[H:\
+	:i1=\E[8;0|\E[?3;4;5;13;15l\E[13;20l\E[?7h\E[12h\E(B\E)B:\
+	:im=\E[4h:is=\E[0m^O:k1=\EOc:k2=\EOd:k3=\EOe:k4=\EOf:\
+	:k5=\EOg:k6=\EOh:k7=\EOi:k8=\EOj:k9=\ENo:kb=\b:\
+	:kd=\E[B:kh=\E[H:kl=\E[D:kr=\E[C:ku=\E[A:nd=\E[C:\
+	:r2=\Ec\E[?3l:rc=\E8:\
+	:.rp=!!! MUST CHANGE BY HAND !!!%p1%c\E[%p2%{1}%-%db:\
+	:sc=\E7:se=\E[27m:so=\E[7m:sr=\EM:st=\EHtbc=\E[3g:\
+	:ts=\E7\E[;%i%dx:ue=\E[24m:up=\E[A:us=\E[4m:\
+	:vb=200\E[?5h\E[?5l:ve=\E[?25h\E[?12l:vi=\E[?25l:\
+	:vs=\E[?12;25h:nl=\E[B:ko=bt,do,nd,up,ho,al:
+730+-41|730R2-41|att730R2-41|730MTGR2-41|AT&T 730R2-41 windowing terminal:\
+	:li#41:tc=730R2:
+730+-24|730R2-24|att730R2-24|730MTGR2-24|AT&T 730R2-24 windowing terminal:\
+	:li#24:tc=730R2:
+730R2-r|att730R2-r|730MTGR2-r|AT&T 730R2 rev video windowing terminal:\
+	:i1=\E[8;0|\E[?3;4;13;15l\E[?5h\E[13;20l\E[?7h\E[12h\E(B\E)B:tc=730R2:
+730+-r-41|730R2-r-41|att730R2-r-41|730MTGR2-r-41|AT&T 730R2-r-41 rev video windowing terminal:\
+	:li#41:tc=730R2-r:
+730+-r-24|730R2-r-24|att730R2-r-24|730MTGR2-r-24|AT&T 730R2-r-24 rev video windowing terminal:\
+	:li#24:tc=730R2-r:

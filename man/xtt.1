@@ -1,0 +1,21 @@
+.TH XTT 1 layers
+.SH NAME
+\f4xtt\f1 \- print xt protocol trace
+.SH SYNOPSIS
+\f4xtt\f1
+.SH DESCRIPTION
+The
+\f4xtt\fP
+command
+is a debugging tool for \f4layers\fP(1).
+It displays the
+circular xt packet trace buffer
+for all channels.
+.SH NOTE
+If driver tracing has not been turned on for the
+terminal session by invoking \f4layers\fP(1)
+with the \f4\-t\f1 option,
+\f4xtt\fP will only enable tracing for later
+invocations.
+.SH SEE ALSO
+\f4layers\fP(1), \f4xtagent\f1(1), \f4xts\fP(1), \f4xtproto\fP(5).

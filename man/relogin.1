@@ -1,0 +1,33 @@
+.TH RELOGIN 1 layers
+.SH NAME
+\f4relogin\f1 \- rename who file entry to show different layer
+.SH SYNOPSIS
+\f4relogin\f1 [channel]
+.SH DESCRIPTION
+The
+\f4relogin\fP
+command notifies \f4layers\f1
+to change the user's
+\f4utmp\fP
+entry to the tty of a different windowing terminal channel.
+\f4write\fP
+messages sent to this user are directed to this channel.
+In addition,
+the
+\f4who\f1
+command will show the user associated with this channel.
+.PP
+Any \f2channel\f1 number may be specified, including channels for windows
+which are not currently created.  The default \f2channel\f1 is the number
+of the current window.
+.PP
+\f4Relogin\fP
+may only be invoked under
+\f4layers\fP.
+.SH SEE ALSO
+\f4layers\fP(1),
+\f4xtagent\fP(1),
+\f4mesg\fP(1),
+\f4ps\fP(1),
+\f4who\fP(1),
+\f4write\fP(1),

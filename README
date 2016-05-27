@@ -1,0 +1,209 @@
+			PSUEDO TTY LAYERS PACKAGE
+
+INTRODUCTION
+	This is the pseudo-tty version of AT&T's layers software package.
+It was originally written for 4.3BSD, especially Suns.
+
+	This package was originally written by Keith Muller at the
+University Of California San Diego and has had numerous enhancements by
+Dave Dykstra at AT&T.  The package is public domain.
+
+	The Keith Muller package had been tested on numerous versions of
+BSD unix and was known to function properly on the following: Vax, Sun, CCI,
+Unisys, ICL, Harris, Alliant, FPS and Gould.  However, many of them have
+not been tested in a long time.
+
+	The Dave Dykstra version has been changed to require even fewer
+BSDisms.  Theoretically the only significant features a Unix should really
+need is pseudo ttys and the winsize/TIOCSWINSZ/TIOCGWINSZ feature for
+keeping track of window sizes.  Systems that have now been tried are
+AT&T/NCR '386 SVR4.0, HP-PA 9.0, and AT&T/NCR Starserver FT (Mips-processor
+based with a variant of RISC/os by Tandem).  See PORTING below for more
+information if your Unix is not one of the supported types.
+
+
+DIFFERENCES BETWEEN THE PSEUDO-TTY AND XT-DRIVER VERSIONS OF LAYERS
+	The environment variable DMD does not have to be set in the
+pseudo-tty layers.  If the environment variable DMD is not set, then the
+compiled-in default path (typically /usr/local/dmdlayers, /usr/local/630,
+or /usr/add-on/630) will be used.  You can use the DMD environment feature
+as described in the ATT terminal manuals to place the software in a
+different location.  Alternatively you can use a symbolic link at the
+compiled-in location pointing to the location where you have installed it.
+If you have source, a single change to the DMD macro in the top level
+makefile, followed by a complete recompile will change the default path
+used by all the installed binaries.
+
+	Pseudo-tty layers no longer needs to be setuid-root.  Instead, one
+or two small support programs are used.  One program handles moving entries
+in the 'who' file (/etc/utmp) and the second handles granting ownership of
+pseudo-ttys.  The first program may not need to be setuid-root if either
+/etc/utmp is world-writable or you're on system that allows non-root
+programs to call pututxline().  The second program may not be necessary at
+all if your system has a grantpt() system call, but if it is necessary it
+needs to be installed setuid-root to work.  Layers looks for these support
+programs in two places: $DMD/lib/layersys and $DMDSYS/lib/layersys.  Both
+$DMD and $DMDSYS have compiled-in defaults if they are not set.  The use of
+these small setuid-root programs greatly eases upgrades to layers.
+
+	The pseudo-tty version also has a enhancements over the XT-driver
+based versions of layers.  The enhancements to layers include the handling
+of the configuration file and disposition of dead layers (where the host
+resident shell has terminated and the layer is now inactive):  Under
+pseudo-tty layers, the configuration file can now contain commands which
+have semantics similar to hostagent calls (see the libwindows man page).
+A new optional mode of operation was added to layers to automatically
+delete a window when the controlling shell exits.  When you exit the shell
+attached to a window, the window on the terminal is deleted.  On XT-driver
+based layers the window would remain, but would be left inactive.  Another
+option will force layers to automatically exit when the last window is
+deleted.  All these enhancements can be easily turned off to mirror
+XT-driver layers semantics.  For more information, see the layers manual
+page.
+
+	Especially on systems other than SunOS, most of the J* ioctls do
+not work on pseudo-tty layers.  This requires some small changes to
+programs which relied upon them under XT-driver layers.  See the beginning
+of the libwindows man page for details of changes required to these programs.
+
+DIFFERENCES FROM THE KEITH MULLER VERSION OF PSEUDO-TTY LAYERS
+	For details of changes, see the HISTORY file.  These are the
+highlights:
+    1. Compiles on many System-V variants as well as BSD variants.
+    2. Openchan() libwindows call returns a pseudo-tty instead of sockets.
+	This allows commands running in another window to work more like
+	commands in normal windows.
+    3. Supports up to 252-byte packets on 730 terminals in regular XT.
+    4. Supports network XT protocol on 730 terminals.
+    5. Flow control added on agent calls to make sure all data from the
+	pseudo-tty is drained before processing the agent call.  This
+	solves problems when starting up multiple downloads either in
+	from multiple windows or sequentially in the same window.
+    6. Layers no longer needs to be setuid-root.
+    7. The 'who' file only shows one logged in window, just like XT-driver
+	layers.  A 'relogin' command is part of the package to change the
+	window that shows up in the 'who' file.
+    8. 'xts', 'xtt', and 'xtagent' commands added to the package.
+    9. Libwindows works under both XT-driver layers and pseudo-tty layers
+	in the same binary.
+    10. A bug which caused lost packets, NAKS, and timeouts due to
+	interrupted writes is fixed.
+    11. Debugging messages can be selectively enabled at run time.
+
+SOURCE INSTALLATION STEPS
+	The makefile is set up to compile /usr/local/dmdlayers as the
+default DMD/DMDSYS path.  The toplevel makefile can be changed to alter this
+default path.  The source files can be placed anywhere regardless of the
+setting for DMD in the makefile (they should NOT be in the same directory
+as the binaries though as the make will step on itself).  A good place for
+the source files is $DMD/src (or $DMD/src/ptlayers if you also have the
+sdp630 software development package and install both under $DMD).
+
+	The layers package is designed to be able to be installed either in
+the same location as the 630 software development package or in a different
+location.  If they are both in the same location, you should be able to
+ignore the setting of the DMDSYS variable and just always use DMD.  If they
+are in different locations, the DMDSYS variable points to layers installation
+location and the DMD variable points to software development package
+installation location.
+
+	The binaries can be owned by any user EXCEPT for the 'movelogin'
+and 'grantpt' (if it exists) programs in $DMD/lib/layersys.  If /etc/utmp
+is world-writable or if pututxent() can be called by non-root users,
+movelogin does not need to be setuid-root; otherwise, layers will not be
+able to update the who file.  'Grantpt' needs to be setuid-root to enable
+to change owner and access rights to the ptys.  These programs can also be
+in $DMDSYS/lib/layersys (a common default for $DMDSYS is "/usr").
+
+	The directory $DMD/xt or $DMDSYS/xt must exist and be mode 0777 for
+layers to start up.  That directory is where the unix domain sockets (or named
+pipes depending on a compile-time option) used in the hostagent system are
+bound.  The layers driver and each program that uses libwindows must be
+able to bind UNIX domain sockets (or create named pipes) in that directory.
+
+A step by step procedure:
+	1) cd to where you have placed the source.
+	2) Check out the file include/lyrscfg.h.  If you are on one of the
+	   supported machine types you shouldn't have to make any changes.
+	   Otherwise, you may have to edit it to select the proper defines
+	   for your system.
+	3) The software follows standard makefile practice. To install
+	   from scratch do
+		make install
+	   at the top level. 
+	   There are three location-specifying parameters you may want to
+	   add on the make command line:
+		DMDSYS - the location for make to install into (defaults to
+			$(DMD))
+		DEFDMD - the default value for $DMD if it is not set at
+			run-time (defaults to $(DMDSYS))
+		DEFDMDSYS - the default value for $DMDSYS if it is not set
+			at run-time (defaults to $(DEFDMD))
+	   You must be able to write to your chosen DMDSYS.  If you run
+	   the make as root the required support programs will be installed
+	   setuid-root.
+	   You can clean it all out with
+		make clean
+	4) Add the termcap in misc/MTG.termcap to /etc/termcap if you wish.
+	   The 5620 termcap not work properly with the 630 MTG.
+	5) Add the $DMDSYS/bin to your path in your shell startup file.
+	6) See the ATT manuals for running layers (and the supplied manual
+	   pages) and for getting started.
+	7) Make sure that the directory $DMDSYS/xt is mode 777.
+	8) Once the software is compiled, there are no references to the source
+	   subtree so the source can be moved or removed.
+
+    ADDITIONAL STEPS FOR NFS/RFS HOSTS SO CLIENTS CAN SUPPORT PSUEDO-TTY LAYERS
+
+	9) If you are running on a nfs/rfs served machine and layers is on
+	   the server you may have problems writing to the directory
+	   $DMDSYS/xt FROM THE CLIENT.  If you DO NOT need to run this
+	   software on the client, SKIP THIS STEP.  Otherwise on the SERVER
+	   do:
+
+		a) rmdir $DMDSYS/xt
+		b) choose a directory that will be local to each machine,
+		    for example /var/spool/xt, and make a symbolic link to
+		    it.  For example,
+		   	ln -s /var/spool/xt $DMDSYS/xt
+
+	   On EACH CLIENT that will need to run the pseudo-tty layers 
+
+		a) Make your chosen directory. For example,
+			mkdir /var/spool/xt
+		b) Make the directory mode 777. For example,
+			chmod 0777 /var/spool/xt
+
+PORTING 
+	The first thing to do is to edit include/lyrscfg.h.  Read the
+comments carefully and try to select the options that are right for your
+system.  If there aren't enough options for your system, add more and
+enable them for your system in lyrscfg.h.  The options may be applicable to
+other machine types too so that's preferable to putting in machine-specific
+defines in the rest of the source.
+
+	If you need to add any compile options, set the EXTRACFLAGS
+variable in the top level makefile.  This flag is intended for use to turn
+on compatibility modes on your compiler if there is a way to do that,
+and if you need them to get layers to compile.
+
+	My goal is to have the same source code compile on all supported
+machine types with a minimum amount of editing.  Sometimes it may be
+necessary to set some EXTRACFLAGS but I'd like to keep that to a minimum.
+If at all possible, the defines in include/lyrscfg.h should be selected
+based on machine and/or operating system-specific defines (for example "i386"
+for '386 based systems) so they can compile without editing.
+
+	You can compile layers with the DEBUG code defined (see layers/
+Makefile) for testing a port, but layers with the DEBUG code compiled in
+should not be used for production use as it is significantly slower and a
+lot more expensive to use.
+
+PROBLEMS
+	If you have problems with any of this software or need help in porting
+feel free to contact me:
+
+	David Dykstra
+	dwd@graceland.ih.att.com
+
+							November, 1993

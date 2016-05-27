@@ -1,0 +1,614 @@
+#
+#	630 terminfo
+#
+#
+630|att630|ATT630|630DMD|630MTG|AT&T 630 windowing terminal,
+	am, da, db, mir, msgr, npc, xon,
+	cols#80, it#8, lines#60, lm#0,
+#
+# short descriptions without \E
+#
+	bel=^G, cr=\r, ht=\t, nel=\r\n,
+#
+# cursor movement
+#
+	cuu1=\E[A,     cud1=\E[B,     cuf1=\E[C,     cub1=\b,
+	cuu=\E[%p1%dA, cud=\E[%p1%dB, cuf=\E[%p1%dC, cub=\E[%p1%dD,
+	cup=\E[%i%p1%d;%p2%dH,
+	home=\E[H,
+	cbt=\E[Z,
+#
+# scrolling
+#
+	ind=\n,         ri=\EM,
+	indn=\E[%p1%dS, rin=\E[%p1%dT,
+#
+# character attributes
+#
+	smul=\E[4m, rmul=\E[m,
+	smso=\E[7m, rmso=\E[m,
+	rev=\E[7m, dim=\E[2m, blink=\E[5m,
+	sgr=\E[0%?%p2%t;4%;%?%p1%p3%|%p4%|%p5%|%t;7%;m,
+	sgr0=\E[m,
+#
+# clear
+#
+	el=\E[K, el1=\E[1K, ed=\E[J, clear=\E[H\E[J,
+#
+# insert/delete
+#
+	dch1=\E[P,     dl1=\E[M,     il1=\E[L,
+	dch=\E[%p1%dP, dl=\E[%p1%dM, il=\E[%p1%dL, ich=\E[%p1%d@,
+	smir=\E[4h,    rmir=\E[4l,
+#
+# pf string
+#
+	pfx=\E[%p1%d;%p2%l%dq%p2%s,
+#
+# set/reset
+#
+	sc=\E7, rc=\E8,
+	is2=\E[m, rs2=\Ec,
+#
+# printer
+#
+	mc4=\E[?4i, mc5=\E[?5i,
+#
+# keyboard definitions
+#
+	kbs=\b, kclr=\E[2J, kent=\r, khome=\E[H,
+	kcuu1=\E[A, kcud1=\E[B, kcuf1=\E[C, kcub1=\E[D,
+	kf9=\ENo,  kf10=\ENp, kf11=\ENq,
+	kf12=\ENr, kf13=\ENs, kf14=\ENt,
+#
+# the following keys are used only by the 122 key keyboard
+#
+	kdch1=\E[P, kdl1=\E[M,
+	kich1=\E[@, kil1=\E[L,
+	kf15=\ENu, kf16=\ENv, kf17=\ENw,
+	kf18=\ENx, kf19=\ENy, kf20=\ENz,
+	kf21=\EN{, kf22=\EN|, kf23=\EN},
+	kf24=\EN~,
+
+
+630-24|att630-24|ATT630-24|630DMD-24|630MTG-24|AT&T 630 windowing terminal 24 lines,
+	lines#24, use=630,
+
+730|att730|730MTG|AT&T 730 windowing terminal,
+
+# has status line of 80 chars
+
+	hs,
+	wsl#80,
+	tsl=\E7\E[;%i%p1%dx,
+
+# support \E on the status line (status_line_esc_ok)
+
+	eslok,
+
+#	screen dimension
+
+	cols#80,
+	lines#60,
+
+# label information
+
+	lw#8,
+	lh#2,
+	nlab#24,
+	rmln=\E[?13h,
+	smln=\E[?13l,
+
+# mapping of alternate character set to ASCII
+
+	acsc=``aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~,
+
+# change the scrolling region
+
+	csr=\E[%i%p1%d;%p2%dr,
+
+# cursor visibility control
+
+	civis=\E[?25l,
+	cnorm=\E[?25h\E[?12l,
+	cvvis=\E[?12;25h,
+
+# character set mode
+
+	smacs=^N,
+	rmacs=^O,
+
+	am,
+	da,
+	db,
+	xenl,
+	mir,
+	msgr,
+	npc,
+	xon,
+	it#8,
+	lm#0,
+
+# short descriptions without \E
+
+	bel=^G,
+	cr=^M,
+	ht=\t,
+
+# cursor movement
+
+	cud1=\E[B,
+	cuf1=\E[C,
+	cuu1=\E[A,
+	cub1=^H,
+	cud=\E[%p1%dB,
+	cuu=\E[%p1%dA,
+	cuf=\E[%p1%dC,
+	cub=\E[%p1%dD,
+	cup=\E[%i%p1%d;%p2%dH,
+	home=\E[H,
+	cbt=\E[Z,
+
+# scrolling
+
+	ind=\ED,
+	ri=\EM,
+#	indn=\E[%p1%dS,
+#	rin=\E[%p1%dT,
+
+# character attributes
+
+	smul=\E[4m,
+	rmul=\E[24m,
+	smso=\E[7m,
+	rmso=\E[27m,
+	rev=\E[7m,
+	sgr=\E[0%?%p6%t;1%;%?%p5%t;2%;%?%p2%t;4%;%?%p4%t;5%;%?%p3%p1%|%t;7%;%?%p7%t;8%;m%?%p9%t^N%e^O%;,
+	sgr0=\E[m^O,
+
+# character attribute mode
+
+	blink=\E[5m,
+	bold=\E[1m,
+	dim=\E[2m,
+	invis=\E[8m,
+
+# line attribute
+
+	swidm=\E#6,
+
+# clear
+
+	el=\E[K,
+	el1=\E[1K,
+	ed=\E[J,
+	clear=\E[H\E[J,
+
+# insert/delete
+
+	dch1=\E[P,
+	dl1=\E[M,
+	il1=\E[L,
+	dch=\E[%p1%dP,
+	dl=\E[%p1%dM,
+	il=\E[%p1%dL,
+	ich=\E[%p1%d@,
+	smir=\E[4h,
+	rmir=\E[4l,
+
+# pf string
+# the escape sequences are different to program
+#	system function keys 1-24
+#	shifted system function keys (numbers 25-48, but no label)
+# <25:  ESC [ pf# ; string-length q 16-char-label up-to-8-char-str
+# >24:  ESC [ pf#-24 ; string-length ; 0 ; 3 q       up-to-8-char-str
+	pfx=\E[%?%p1%{25}%<%t%p1%e%p1%{24}%-%;%d;%p2%l%02d%?%p1%{25}%<%tq\s\s\sSYS\s\s\s\s\sF%p1%:-2d\s\s%e;0;3q%;%p2%s,
+
+# set/reset
+
+	sc=\E7,
+	rc=\E8,
+	is2=\E[0m^O,
+	rs2=\Ec\E[?3l,
+
+# printer
+
+	mc0=\E[?19h\E[0i,
+	mc4=\E[?4i,
+	mc5=\E[?5i,
+
+# keyboard definition
+
+	kich1=\E[@,
+	kil1=\E[L,
+
+	kbs=^H,
+	kclr=\E[2J,
+	khome=\E[H,
+	kcbt=\E[Z,
+	kcuu1=\E[A,
+	kcud1=\E[B,
+	kcuf1=\E[C,
+	kcub1=\E[D,
+	kf1=\EOc,
+	kf2=\EOd,
+	kf3=\EOe,
+	kf4=\EOf,
+	kf5=\EOg,
+	kf6=\EOh,
+	kf7=\EOi,
+	kf8=\EOj,
+	kf9=\ENo,
+	kf10=\ENp,
+	kf11=\ENq,
+	kf12=\ENr,
+	kf13=\ENs,
+	kf14=\ENt,
+	kf15=\ENu,
+	kf16=\ENv,
+	kf17=\ENw,
+	kf18=\ENx,
+	kf19=\ENy,
+	kf20=\ENz,
+	kf21=\EN{,
+	kf22=\EN|,
+	kf23=\EN},
+	kf24=\EN~,
+
+# the following keys are used for shifted system Fkeys
+
+	kf25=\EOC,
+	kf26=\EOD,
+	kf27=\EOE,
+	kf28=\EOF,
+	kf29=\EOG,
+	kf30=\EOH,
+	kf31=\EOI,
+	kf32=\EOJ,
+	kf33=\ENO,
+	kf34=\ENP,
+	kf35=\ENQ,
+	kf36=\ENR,
+	kf37=\ENS,
+	kf38=\ENT,
+	kf39=\EOU,
+	kf40=\EOV,
+	kf41=\EOW,
+	kf42=\EOX,
+	kf43=\EOY,
+	kf44=\EOZ,
+	kf45=\EO[,
+	kf46=\EO\s,
+	kf47=\EO],
+	kf48=\EO\^,
+
+	flash=\E[?5h$<200>\E[?5l,
+	fsl=\E8,
+	is1=\E[8;0|\E[?3;4;5;13;15l\E[13;20l\E[?7h\E[12h\E(B\E)B,
+	is3=\E(B\E)0,
+	kind=\E[S,
+	kri=\E[T,
+	nel=\EE,
+
+
+	pln=\E[%p1%d;0;0;0q%p2%:-16.16s,
+	kLFT=\E[\s@,
+	kRIT=\E[\sA,
+
+# add sequences for changing flow control setting
+
+	smxon=\E[?21;29h,
+	rmxon=\E[?21l,
+
+# add shifted HOME key
+
+	kHOM=\ENM,
+
+# repeat char
+
+#	rep=%p1%c\E[%p2%1%-$db,
+
+
+730-41|att730-41|730MTG-41|AT&T 730-41 windowing terminal,
+
+	lines#41,
+	use=730,
+
+730-24|att730-24|730MTG-24|AT&T 730-24 windowing terminal,
+
+	lines#24,
+	use=730,
+
+730r|att730r|730MTGr|AT&T 730 rev video windowing terminal,
+
+	flash=\E[?5l$<200>\E[?5h,
+	is1=\E[8;0|\E[?3;4;13;15l\E[?5h\E[13;20l\E[?7h\E[12h\E(B\E)B,
+	use=730,
+
+730r-41|att730r-41|730MTG-41r|AT&T 730r-41 rev video windowing terminal,
+
+	lines#41,
+	use=730r,
+
+730r-24|att730r-24|730MTGr-24|AT&T 730r-24 rev video windowing terminal,
+
+	lines#24,
+	use=730r,
+
+
+730R2|730+|att730R2|730MTGR2|AT&T 730+ and 730R2 windowing terminal,
+
+# has status line of 80 chars
+
+	hs,
+	wsl#80,
+	tsl=\E7\E[;%i%p1%dx,
+
+# support \E on the status line (status_line_esc_ok)
+
+	eslok,
+
+#	screen dimension
+
+	cols#80,
+	lines#60,
+
+# label information
+
+	lw#8,
+	lh#2,
+	nlab#24,
+	rmln=\E[?13h,
+	smln=\E[?13l,
+
+# mapping of alternate character set to ASCII
+
+	acsc=``aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~,
+
+# change the scrolling region
+
+	csr=\E[%i%p1%d;%p2%dr,
+
+# cursor visibility control
+
+	civis=\E[?25l,
+	cnorm=\E[?25h\E[?12l,
+	cvvis=\E[?12;25h,
+
+# character set mode
+
+	smacs=^N,
+	rmacs=^O,
+        enacs=\E(B\E)0,
+	am,
+	da,
+	db,
+	xenl,
+	mir,
+	msgr,
+	npc,
+	xon,
+	lm#0,
+
+# short descriptions without \E
+
+	bel=^G,
+	cr=^M,
+
+# cursor movement
+
+	cud1=\E[B,
+	cuf1=\E[C,
+	cuu1=\E[A,
+	cub1=^H,
+	cud=\E[%p1%dB,
+	cuu=\E[%p1%dA,
+	cuf=\E[%p1%dC,
+	cub=\E[%p1%dD,
+	cup=\E[%i%p1%d;%p2%dH,
+	home=\E[H,
+
+# scrolling
+
+	ind=\ED,
+	ri=\EM,
+#	indn=\E[%p1%dS,
+#	rin=\E[%p1%dT,
+
+# character attributes
+
+	smul=\E[4m,
+	rmul=\E[24m,
+	smso=\E[7m,
+	rmso=\E[27m,
+	rev=\E[7m,
+	sgr=\E[0%?%p6%t;1%;%?%p5%t;2%;%?%p2%t;4%;%?%p4%t;5%;%?%p3%p1%|%t;7%;%?%p7%t;8%;m%?%p9%t^N%e^O%;,
+	sgr0=\E[m^O,
+
+# character attribute mode
+
+	blink=\E[5m,
+	bold=\E[1m,
+	dim=\E[2m,
+	invis=\E[8m,
+
+# line attribute
+
+	swidm=\E#6,
+
+# clear
+
+	el=\E[K,
+	el1=\E[1K,
+	ed=\E[J,
+	clear=\E[H\E[J,
+
+# insert/delete
+
+	dch1=\E[P,
+	dl1=\E[M,
+	il1=\E[L,
+	dch=\E[%p1%dP,
+	dl=\E[%p1%dM,
+	il=\E[%p1%dL,
+	ich=\E[%p1%d@,
+	smir=\E[4h,
+	rmir=\E[4l,
+
+# pf string
+#
+# pkey_plab,            pfxl            Prog funct key #1 to xmit string #2
+#                                       and show label string #3
+#
+	pfxl=\E[%p1%d;%p2%l%02d;0;0q%p3%:-16.16s%p2%s,
+#
+# pkey_xmit,            pfx     px     Prog funct key #1 to xmit string #2
+#
+#
+	pfx=\E[%?%p1%{25}%<%t%p1%e%p1%{24}%-%;%d;%p2%l%02d%?%p1%{25}%<%tq\s\s\sSYS\s\s\s\s\sF%p1%:-2d\s\s%e;0;3q%;%p2%s,
+
+# set/reset
+
+	sc=\E7,
+	rc=\E8,
+	is2=\E[0m^O,
+	rs2=\Ec\E[?3l,
+
+# tab set/reset
+
+	it#8,
+	hts=\EH
+	tbc=\E[3g,
+	ht=\t,
+	cbt=\E[Z,
+
+# printer
+
+	mc0=\E[?19h\E[0i,
+	mc4=\E[?4i,
+	mc5=\E[?5i,
+
+# keyboard definition
+
+	kich1=\E[@,
+	kil1=\E[L,
+
+	kbs=^H,
+	kclr=\E[2J,
+	khome=\E[H,
+	kcbt=\E[Z,
+	kcuu1=\E[A,
+	kcud1=\E[B,
+	kcuf1=\E[C,
+	kcub1=\E[D,
+	kf1=\EOc,
+	kf2=\EOd,
+	kf3=\EOe,
+	kf4=\EOf,
+	kf5=\EOg,
+	kf6=\EOh,
+	kf7=\EOi,
+	kf8=\EOj,
+	kf9=\ENo,
+	kf10=\ENp,
+	kf11=\ENq,
+	kf12=\ENr,
+	kf13=\ENs,
+	kf14=\ENt,
+	kf15=\ENu,
+	kf16=\ENv,
+	kf17=\ENw,
+	kf18=\ENx,
+	kf19=\ENy,
+	kf20=\ENz,
+	kf21=\EN{,
+	kf22=\EN|,
+	kf23=\EN},
+	kf24=\EN~,
+
+# the following keys are used for shifted system Fkeys
+
+	kf25=\EOC,
+	kf26=\EOD,
+	kf27=\EOE,
+	kf28=\EOF,
+	kf29=\EOG,
+	kf30=\EOH,
+	kf31=\EOI,
+	kf32=\EOJ,
+	kf33=\ENO,
+	kf34=\ENP,
+	kf35=\ENQ,
+	kf36=\ENR,
+	kf37=\ENS,
+	kf38=\ENT,
+	kf39=\EOU,
+	kf40=\EOV,
+	kf41=\EOW,
+	kf42=\EOX,
+	kf43=\EOY,
+	kf44=\EOZ,
+	kf45=\EO[,
+	kf46=\EO\s,
+	kf47=\EO],
+	kf48=\EO\^,
+
+	flash=\E[?5h$<200>\E[?5l,
+	fsl=\E8,
+	is1=\E[8;0|\E[?3;4;5;13;15l\E[13;20l\E[?7h\E[12h\E(B\E)B,
+	is3=\E(B\E)0,
+	kind=\E[S,
+	kri=\E[T,
+	nel=\EE,
+
+
+	pln=\E[%p1%d;0;0;0q%p2%:-16.16s,
+	kLFT=\E[\s@,
+	kRIT=\E[\sA,
+
+# sequences for changing flow control setting
+
+	smxon=\E[?21h,
+	rmxon=\E[?21l,
+
+# add shifted HOME key
+# NOTE: The 98 key keyboard translation for shift/HOME is 
+# currently the same as khome (unshifted HOME or \E[H).  On
+# the 102, 102+1 and 122 key keyboards, the 730's translation
+# is \E[2J.  For consistency
+# kHOM has been commented out.  The user can uncomment kHOM
+# if using the 102, 102+1, or 122 key keyboards
+#       kHOM=\E[2J,
+
+# repeat char
+
+        rep=%p1%c\E[%p2%{1}%-%db,
+
+
+730+-41|730R2-41|att730R2-41|730MTGR2-41|AT&T 730R2-41 windowing terminal,
+
+	lines#41,
+	use=730R2,
+
+730+-24|730R2-24|att730R2-24|730MTGR2-24|AT&T 730R2-24 windowing terminal,
+
+	lines#24,
+	use=730R2,
+
+730R2-r|att730R2-r|730MTGR2-r|AT&T 730R2 rev video windowing terminal,
+
+	flash=\E[?5l$<200>\E[?5h,
+	is1=\E[8;0|\E[?3;4;13;15l\E[?5h\E[13;20l\E[?7h\E[12h\E(B\E)B,
+	use=730R2,
+
+730+-r-41|730R2-r-41|att730R2-r-41|730MTGR2-r-41|AT&T 730R2-r-41 rev video windowing terminal,
+
+	lines#41,
+	use=730R2-r,
+
+730+-r-24|730R2-r-24|att730R2-r-24|730MTGR2-r-24|AT&T 730R2-r-24 rev video windowing terminal,
+
+	lines#24,
+	use=730R2-r,
+
+

@@ -1,0 +1,288 @@
+.\" use "-rZ1" for exptools
+.if \nZ=0 .ds x} LIBWINDOWS 3 layers
+.if \nZ=1 .ds x} LIBWINDOWS 3 EXPTOOLS
+.TH \*(x}
+.SH NAME
+libwindows \- layers host agent library
+.SH SYNOPSIS
+.if \nZ=1 dmddir=$TOOLS/lib/agent
+.if \nZ=1 .br
+.B cc
+.if \nZ=0 -I$DMD/include \|.\|.\|. $DMD/lib/libwindows.a
+.if \nZ=1 -I$dmddir/include \|.\|.\|. $dmddir/lib/libwindows.a
+.PP
+\f3
+.nf
+int	layerstype
+int	yesno
+int	cntlfd, fd
+int	chan
+int	origin_x, origin_y, corner_x, corner_y
+char	*command
+char	*string
+char	*answer
+char	*name
+int	length
+int	*bytesxp, *bytesyp, *bitsxp, *bitsyp
+void	(*errf)()
+int	(*nonrawf)()
+layerstype = inlayers()
+yesno = onloginlayer()
+cntlfd = openagent()
+closeagent()
+chan = New(cntlfd, origin_x, origin_y, corner_x, corner_y)
+chan = Newlayer(cntlfd, origin_x, origin_y, corner_x, corner_y)
+name = findchanname(chan)
+fd = openchanname(name)
+fd = openchan(chan)
+Runlayer(chan, command)
+Runwaitlayer(chan, command)
+Current(cntlfd, chan)
+Delete(cntlfd, chan)
+Top(cntlfd, chan)
+Bottom(cntlfd, chan)
+Move(cntlfd, chan, origin_x, origin_y)
+Reshape(cntlfd, chan, origin_x, origin_y, corner_x, corner_y)
+Romversion(cntlfd, string, length)
+Exit(cntlfd)
+Jboot()
+Jzomboot()
+Jterm()
+Jwinsize(bytesxp, bytesyp, bitsxp, bitsyp)
+ioctlagent(cntlfd, command, x1, y1, x2, y2, chan)
+chan = getchan()
+result = getagentansresult()
+chan = getagentanschans()
+answer = getagentanswer()
+setagenterrf(errf)
+setagentnonrawf(nonrawf)
+.fi
+\f1
+.SH DESCRIPTION
+This library of routines enables a program running on a host UNIX system to
+perform windowing terminal mouse functions (see \f2layers\f1(1)).
+This is a library for host executables, it is NOT for programs that are
+compiled with dmdcc for downloading.  This version of 
+.B libwindows
+works with both XT-driver based layers and pseudo-tty based layers.
+.SH COMPATIBILITY
+For maximum compatibility between different versions of layers, programs
+should use this library and make the following changes:
+.PP
+1. JMPX ioctls should be replaced by \f3inlayers\f1(\|) or removed
+entirely; many programs will run on a 630/730 without being in layers.
+.PP
+2. JBOOT, JZOMBOOT, JTERM, and JWINSIZE ioctls should be replaced by calls to
+Jboot(), Jzomboot(), Jterm(), and Jwinsize() respectively.
+If you want to have your code compile with previous versions of
+.B libwindows
+you can key off the USE_HOSTAGENT define after including "sys/jioctl.h".
+.PP
+3. Programs that used only \f3openagent\f1(\|) should also use
+\f3closeagent\f1(\|) to shut down the connection.
+.PP
+4. Programs that used the last digit returned from \f3ttyname\f1(3) to
+determine the XT channel number should use \f3getchan\f1(\|) instead.
+Shell scripts that used the last digit returned from "tty" should use
+.if \nZ=1 "agent -c"
+.if \nZ=0 "xtagent -c"
+instead.
+.PP
+5. Programs that looked in the utmp file or used "who am i" to determine
+whether or not a window was the loggined-in layer should use
+\f3onloginlayer\f1(3) instead.  Shell scripts should use
+.if \nZ=1 "agent -l".
+.if \nZ=0 "xtagent -l".
+.PP
+6. Programs that do not want error messages going to stderr should use
+\f3setagenterrf\f1(\|) to trap the messages.
+.SH ROUTINES
+.PP
+The \f3inlayers\f1(\|) routine returns \f30\f1 if none of stdin, stdout, and
+stderr are attached to a tty that is running under \f2layers\f1(1).  Otherwise,
+it returns a number indicating what kind of layers is running: \f31\f1 for
+character XT-driver based \f2layers\f1, \f32\f1 for streams XT-driver based
+\f2layers\f1, and \f33\f1 for pseudo-tty based \f2layers\f1.
+.PP
+The \f3onloginlayer\f1(\|) routine returns \f31\f1 if one of stdin, stdout,
+or stderr is attached to a tty that is the logged-in layer running under
+\f2layers\f1(1).  Otherwise, it returns \f30\f1.
+.PP
+The \f3openagent\f1(\|) routine opens the control channel of the \f2layers\f1(1)
+multiplexor to which the calling process belongs.
+Upon successful completion, \f3openagent\f1(\|) returns a file descriptor,
+\f2cntlfd\f1,
+that should be passed to the other \f2libwindows\f1 routines
+that require a file descriptor.
+Otherwise, the value \f3\-1\fP is returned.
+.PP
+The \f3closeagent\f1(\|) routine closes the control channel opened by
+a previous \f3openagent\f1(\|) call. This should
+be called after the last possible agent call is made in a program.
+.PP
+The \f3New\f1(\|) routine creates a new layer with a separate shell.
+The \f2 origin_x, origin_y, corner_x\f1, and \f2corner_y\f1 arguments
+are the coordinates of the layer rectangle.
+If all the coordinate arguments are 0, the user must 
+define the layer's rectangle interactively.
+The layer appears on top of any overlapping layers.
+The layer is not made current (i.e., the
+keyboard is not attached to the new layer).
+Upon successful completion, \f3New\f1(\|) returns the \f3xt\f1(7)
+channel number associated with the layer.
+Otherwise, the value \f3\-1\fP is returned.
+.PP
+The \f3Newlayer\f1(\|) routine creates a new layer
+without executing a separate shell.
+Otherwise it is identical to \f3New\f1(\|), described above.
+.PP
+The \f3findchanname\f1(\|) routine returns a pointer to a string which
+is the device name that corresponds to the channel argument \f2chan\f1.
+If it fails, \f3NULL\f1 is returned.  Beware that if \f3findchanname\f1(\|)
+is called again with a different channel number then the name string will be
+modified.
+.PP
+The \f3openchanname\f1(\|) routine opens the device \f2name\f1
+which was obtained from the \f3findchanname\f1(\|) routine.
+Upon successful completion, \f3openchanname\f1(\|) returns a read-write file
+descriptor for that channel.
+Otherwise, the value \f3\-1\fP is returned.  Use \f3close\f1(2) to close
+the file descriptor.
+.PP
+The \f3openchan\f1(\|) routine calls \f2findchanname\f1(\|) and
+\f2openchanname\f1(\|).
+Upon successful completion, \f3openchan\f1(\|) returns a read-write file
+descriptor for a pseudo-tty for that channel.
+Otherwise, the value \f3\-1\fP is returned.  Use \f3close\f1(2) to close
+the file descriptor.
+.PP
+The \f3Runlayer\f1(\|) routine runs the specified \f2command\f1 in the
+layer associated with the channel argument \f2chan\f1.  Tty settings
+for the command are taken from the tty connected to stdin, stdout, or
+stderr of the calling program, unless the \f3setagentnonrawf\f1(\|)
+routine is called (see below).
+Returns the process id of the forked process or \f3-1\f1 on failure.
+.PP
+The \f3Runwaitlayer\f1(\|) routine is just like \f3Runlayer\f1(\|) except
+that it waits for the child process to die.  It catches signals so if
+the calling program dies, the child will also be killed.  Returns the
+exit code from the \f2command\f1.
+.PP
+The \f3Current\f1(\|) routine makes the layer associated with the
+channel argument \f2chan\f1 current (i.e., attached to the
+keyboard).
+.PP
+The \f3Delete\f1(\|) routine deletes the layer associated with the
+channel argument \f2chan\f1 and kills all host processes associated
+with the layer.
+.PP
+The \f3Top\f1(\|) routine makes the layer associated with the channel
+argument \f2chan\f1 appear on top of all overlapping layers.
+.PP
+The \f3Bottom\f1(\|) routine puts the layer associated with the channel
+argument \f2chan\f1 under all overlapping layers.
+.PP
+The \f3Move\f1(\|) routine moves the layer associated with the channel
+argument \f2chan\f1 from its current screen location to a new
+screen location at the origin point (\f2origin_x, origin_y\f1).
+The size and contents of the layer are maintained.
+.PP
+The \f3Reshape\f1(\|) routine reshapes the layer associated with the
+channel argument \f2chan\f1.
+The arguments \f2origin_x, origin_y, corner_x\f1,
+and \f2corner_y\f1 are the new coordinates of the layer rectangle.
+If all the coordinate arguments are 0, the user is allowed to define
+the layer's rectangle interactively.
+.PP
+The \f3Romversion\f1(\|) routine copies the parameter part of
+the terminal id string (e.g., "8;8;6") into the character array
+string up to length characters.
+.PP
+The \f3Exit\f1(\|) routine causes the \f3layers\f1(1)
+program to exit, killing all
+processes associated with it.
+.PP
+The \f3Jboot\f1(\|) routine causes the current window to go into download mode.
+.PP
+The \f3Jzomboot\f1(\|) routine causes the current window to go into download
+mode but to not start the downloaded code after downloading.
+.PP
+The \f3Jterm\f1(\|) routine causes the current window to either exit download
+mode or kill the currently running process in the terminal and start a new
+windowproc.
+.PP
+The \f3Jwinsize\f1(\|) routine returns the window sizes in columns and rows
+and in pixels.  It fills in the values to which pointers are passed in as
+parameters.  If any of the pointers are zero, those values are not filled in.
+.PP
+The \f3ioctlagent\f1(\|) routine is the general purpose routine that sends
+an agent call to \f3layers\f1(1); other agent call routines use this
+routine.  The parameters are as follows: 'cntlfd' is the file descriptor 
+returned from \f3openagent\f1(\|); 'command' is the command number as
+found in "agent.h" or "hostagent.h"; 'x1', 'y1', 'x2', and 'y2' are the
+four short (2-byte) parameters to the agent call; 'chan' is the channel number.
+.PP
+The \f3getchan\f1(\|) routine returns the channel number (if any)
+of the layer the process is invoked from.
+.PP
+The \f3getagentansresult\f1(\|) routine returns the integer result 
+returned from an agent call.  It is zero if the agent call succeeded
+and non-zero (either -1 or 1) if the agent call failed.
+.PP
+The \f3getagentanschan\f1(\|) routine returns the integer channel
+returned from an agent call.  Usually it is the same as the requesting
+channel but on A_NEW or A_NEWLAYER it is the number of the allocated channel.
+.PP
+The \f3getagentanswer\f1(\|) routine returns the (char *) answer buffer
+returned from an agent call.  The answer buffer is a maximum of 8 bytes
+long.  Most agent calls don't return anything interesting in the answer
+buffer; the A_ROMVERSION agent call is a notable exception.
+.PP
+The \f3setagenterrf\f1(\|) routine sets a pointer to a function that 
+accepts one "char *" pointer.  This function will be called with an
+error message whenever any function encounters an error.
+.PP
+The \f3setagentnonrawf\f1(\|) routine sets a pointer to a function that
+gets a file descriptor as a parameter, sets that file descriptor into
+non-raw mode, and returns -1 upon failure or something other than -1 upon
+success.  This function will be called whenever \f3Runlayer\f1(\|) is
+called to set the tty settings for the command in the window.  This is
+useful for programs that have set their main tty to raw mode but want the
+command in the window to run in non-raw mode.  If \f3setagentnonrawf\f1(\|)
+is not called, the tty settings for \f3Runlayer\f1(\|) are taken from the
+main tty.
+.SH RETURN VALUE
+Unless otherwise noted in the individual routine description, routines
+return \f30\f1 upon successful completion and \f3\-1\f1 if there is an
+error.
+.SH NOTE
+The values of layer rectangle coordinates are dependent on the type of 
+terminal.
+This dependency affects the routines that pass layer rectangle coordinates:
+\f3Move\f1(\|), \f3New\f1(\|), \f3Newlayer\f1(\|), and \f3Reshape\f1(\|).
+Some terminals will expect these numbers to be passed as character
+positions (bytes);
+others will expect the information to be in pixels (bits).
+.P
+For example, for the AT&T 630 MTG terminal,
+\f3New\f1(\|), \f3Newlayer\f1(\|), and
+\f3Reshape\f1(\|) take minimum values of 6 (pixels) for
+.I origin_x
+and
+.I origin_y
+and maximum values of 1018 (pixels) for
+.I corner_x
+and 1018 (pixels) for
+.IR corner_y .
+In addition, the minimum layer size is 32 by 32 pixels
+and the maximum layer size is 1018 by 1018 pixels.
+See the appropriate terminal manual for more specific details.
+.SH BUGS
+Some versions of the 620 MTG return success status on Delete() even when it
+fails. A New() on some 615 MTG's might need to be followed by a Current() to
+get access to the new window.
+.SH SEE ALSO
+layers(1), 
+.if \nZ=1 agent(1)
+.if \nZ=0 xtagent(1)
+.Ee

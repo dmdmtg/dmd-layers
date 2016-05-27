@@ -1,0 +1,262 @@
+.TH XTPROTO 5 layers
+.SH NAME
+\f4xtproto\f1 \- multiplexed channels protocol used by \f4layers\f1
+.SH DESCRIPTION
+This \f4xt\f1 protocol is used for communication between multiple
+UNIX System host processes and a windowing terminal
+operating under the \f4layers\f1 command.
+It is a multiplexed protocol that directs traffic between
+host processes and terminal windows, thereby allowing multiple virtual
+terminal sessions over a single connection. 
+.SH LOW-LEVEL PROTOCOLS
+Two distinct low level protocols exist.
+The regular \f4xt\f1 protocol is used when communicating over unreliable media 
+such as \s-1RS\s0-232. 
+The regular \f4xt\f1 protocol provides flow control and error correction,
+thereby guaranteeing error-free delivery of data. 
+The network \f4xt\f1 protocol is used when communicating over reliable media
+such as a local area network. 
+In order to achieve maximum possible throughput,
+the network \f4xt\f1 protocol relies on the underlying network to provide
+flow control and error correction.
+.PP
+The \f4layers\f1 command queries the windowing terminal 
+whether to use regular
+or network \f4xt\f1 protocol through an \f4A_XTPROTO agent call
+[see \f4layers\f1(5)].
+The \f4layers\f1 command then decides what protocol to use.
+.SH Regular XT
+The regular \f4xt\f1 protocol uses packets with a 2-byte header containing a
+3-bit sequence number, 3-bit channel number, control flag, and one
+byte for data size. 
+The data part of packets sent from the host to
+the terminal may not be larger than 252 bytes. 
+When communicating with some earlier windowing terminals, 
+maximum data part size is fixed at 32 bytes. 
+The maximum data part size of packets sent from the terminal
+to the host is always fixed at 32 bytes. 
+The trailer contains a \s-1CRC\s0-16 code in 2 bytes. 
+Each channel is double-buffered.
+.PP
+Correctly received regular \f4xt\f1 packets in
+sequence are acknowledged with a
+control packet containing an \s-1ACK\s0; however, out of
+sequence packets generate a control packet containing
+a \s-1NAK\s0, which causes the retransmission in
+sequence of all unacknowledged packets.
+.PP
+Unacknowledged regular \f4xt\f1 packets are retransmitted after a timeout
+interval that is dependent on baud rate.
+Another timeout parameter specifies the interval after which
+incomplete receive packets are discarded.
+.SH Network XT
+Network \f4xt\f1 protocol uses a 3-byte header containing a 3-bit channel
+number, various control flags, and 2-bytes for data size. 
+The data part of packets sent from the host to the terminal has no size limit.
+The data part of packets sent from the terminal to the host is
+restricted to 1025 bytes.
+.PP
+Since network \f4xt\f1 protocol relies on the underlying media to
+guarantee error-free delivery of data, no \s-1CRC\s0 codes or
+timeouts are needed.
+.PP
+Network \f4xt\f1 protocol provides a simple flow control mechanism to
+limit the amount of data sent to a window in the terminal before a
+\f4NETWORK XT ACK\fP
+acknowledgement is received by the host. 
+The intent of this flow control is to limit the amount of data sent to a window 
+in the terminal not reading its input because, for example, the user 
+has pressed the scroll lock key. 
+This is necessary to prevent data from backing up and
+blocking other data directed to other windows.
+To improve overall throughput,
+network \f4xt\f1 flow control can be disabled by processes in the terminal that
+always read their input quickly.
+.SH HIGHER-LEVEL PROTOCOL
+The contents of packets transferring data between
+a UNIX System process and
+the terminal are asymmetric.
+.SH Commands to the terminal
+Data sent from the UNIX System to a particular
+terminal process are undifferentiated
+and it is up to the terminal
+process to interpret the contents of packets.
+.PP
+Control information for terminal
+processes is sent via channel 0.
+Process 0 in the windowing terminal
+performs the designated functions on behalf
+of the process connected to the designated channel.
+These packets take the form:
+.PP
+.RS
+\f2command\fP, \f2channel\fP
+.RE
+.PP
+except for
+\f4JTIMO\f1,
+\f4JTIMOM\f1
+and
+\f4JAGENT\fP
+information, which takes the form
+.PP
+.RS
+\f2command\fP, \f2data\fP ...
+.RE
+.PP
+The commands are the bottom eight bits extracted from
+the following codes from "sys/jioctl.h":
+.TP 10
+\f4JBOOT\fP
+Prepare to load a new terminal program into the designated layer.
+.TP
+\f4JTERM\fP
+Kill the downloaded layer program, and restore the default window program.
+.TP
+\f4JTIMO\fP
+Set the timeout parameters for the protocol.
+The data consist of two bytes:
+the value of the receive timeout in seconds
+and the value of the transmit timeout in seconds.
+.TP
+\f4JTIMOM\fP
+Set the timeout parameters for the protocol.
+The data consist of four bytes in two groups:
+the value of the receive timeout in milliseconds
+(the low eight bits followed by the high eight bits) and
+the value of the transmit timeout (in the same format).
+.TP
+\f4JZOMBOOT\fP
+Like \f4JBOOT\fP, but do not execute the program after loading.
+.TP
+\f4JAGENT\fP
+Send a source byte string to the terminal agent routine and wait for a
+reply byte string to be returned.
+.IP ""
+The data are from a \f4bagent\f1
+structure and consist of a
+one-byte size field followed by a two-byte agent
+command code and parameters.
+Two-byte integers transmitted as part of
+an agent command are sent with the high-order byte first.
+The response from the terminal is generally identical
+to the command packet, with the two command bytes replaced
+by the return code: \f40\f1 for success, \f4\-1\f1 for failure.
+Note that the routines in the
+\f4libwindows\fP(3X)
+library all
+send parameters in an \f4agentrect\fP structure.
+The agent command codes and their parameters are as follows:
+.RS 10
+.TP 16
+\f4A_NEWLAYER\fP
+followed by a two-byte channel number and a rectangle
+structure (four two-byte coordinates).
+.TP
+\f4A_CURRENT\fP
+followed by a two-byte channel number.
+.TP
+\f4A_DELETE\fP
+followed by a two-byte channel number.
+.TP
+\f4A_TOP\fP
+followed by a two-byte channel number.
+.TP
+\f4A_BOTTOM\fP
+followed by a two-byte channel number.
+.TP
+\f4A_MOVE\fP
+followed by a two-byte channel number and a point
+to move to (two two-byte coordinates).
+.TP
+\f4A_RESHAPE\fP
+followed by a two-byte channel number and the new
+rectangle (four two-byte coordinates).
+.TP
+\f4A_NEW\fP
+followed by a two-byte channel number and a rectangle
+structure (four two-byte coordinates).
+.TP
+\f4A_EXIT\fP
+no parameters needed.
+.TP
+\f4A_ROMVERSION\fP
+no parameters needed.  The response packet
+contains the size byte, two-byte return code,
+two unused bytes, and the parameter part of
+the terminal
+.SM ID
+string (e.g., \f48;7;3\f4).
+.RE
+.TP 10
+\f4JXTPROTO\f1
+Set \f4xt\fP protocol type.
+The data consist of one byte specifying maximum size for the data part of
+regular \f4xt\fP packets sent from the host to the terminal.
+This number may be different than the number returned by \f4A_XTPROTO\fP.
+A size of 1 specifies network \f4xt\fP protocol.
+.SH Commands from the terminal
+Packets from the windowing terminal to the UNIX System all take the
+following form:
+.PP
+.RS
+\f2command\fP, \f2data\fP ...
+.RE
+.PP
+The single-byte commands are as follows:
+.RS 2
+.TP 20
+\f4C_SENDCHAR\fP
+Send the next byte to the UNIX System process.
+.TP
+\f4C_NEW\fP
+Create a new UNIX System process group for this layer.
+Remember the
+window size
+parameters for this layer.
+The data for this command is in the form described by the
+\f4jwinsize\f1
+structure.
+The size of the window is specified by two 2-byte integers, sent low byte first.
+.TP
+\f4C_UNBLK\fP
+Unblock transmission to this layer.
+There are no data for this command.
+.TP
+\f4C_DELETE\fP
+Delete the UNIX System process group attached to this layer.
+There are no data for this command.
+.TP
+\f4C_EXIT\fP
+Exit.  Kill all UNIX System process groups 
+associated with this terminal and terminate the session.
+There are no data for this command.
+.TP
+\f4C_DEFUNCT\fP
+Layer program has died,
+send a terminate signal to the UNIX System process groups associated
+with this terminal.
+There are no data for this command.
+.TP
+\f4C_SENDNCHARS\fP
+The rest of the data are characters to be
+passed to the UNIX System process.
+.TP
+\f4C_RESHAPE\fP
+The layer has been reshaped.  Change the
+window size
+parameters for this layer.
+The data take the same form as for the
+\f4C_NEW\fP command.
+A \f4SIGWINCH\fP signal is also sent to the process in the window, so
+that the process knows that the window has been reshaped and it
+can get the new window parameters.
+.TP
+\f4C_NOFLOW\fP
+Disable network \f4xt\fP flow control.
+.TP
+\f4C_YESFLOW\fP
+Enable network \f4xt\fP flow control.
+.RE
+.SH SEE ALSO
+\f4layers\fP(1), \f4libwindows\fP(3)

@@ -1,0 +1,35 @@
+.ds ZZ CORE PACKAGE
+.TH ISMPX 1
+.SH NAME
+ismpx \- query windowing terminal state
+.SH SYNOPSIS
+.B "ismpx [-]"
+.SH DESCRIPTION
+The
+.I ismpx
+utility
+is used to determine whether your windowing terminal
+(such as 5620 DMD, 630 MTG or 730 MTG) is under \fIlayers\fR
+mode or \fIstand-alone\fR mode.
+It is useful for shell scripts that download DMD or MTG programs, such as \fIdemo\fR(1).
+.PP
+The
+\fIismpx\fR utility prints "yes" and returns 0 (true) if invoked under \fIlayers\fR,
+and prints "no" and returns 1 otherwise.
+When invoked with the dash "\fB\-\fR", \fIismpx\fR does not print anything
+and just returns with the proper exit code.
+.SH SEE ALSO
+demo(1), layers(1).
+.SH EXAMPLE
+.nf
+.ft CM
+if ismpx -
+then
+	32ld bounce.m
+else
+	32ld bounce.j
+fi
+.fi
+.ft  R
+
+

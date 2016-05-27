@@ -1,0 +1,566 @@
+This file contains brief descriptions of changes made to the pseudo-tty
+layers in chronological order.  This file was created 4/19/93 so dates
+before that time are approximate.  Unless otherwise noted, all changes were
+made by Dave Dykstra.
+
+1991
+====
+10/1	Keith Muller's version of layers retrieved from anonymous ftp ucsd.edu 
+	at pub/dmdlayers.tar.Z.
+
+12/1	Modified openchan() libwindows call to return a pseudo-tty instead of
+	a socket; this supports starting a program in a window from another
+	process such as "agent !".  Also removed openrwchan() as it is no
+	longer necessary.
+
+1992
+====
+2/1	Added calls to signal() at the end of signal handling routines to
+	reset signal handlers in case layers is compiled with /usr/5bin/cc
+	on a sun.
+
+4/23	Strip off eigth bit of TIOCUCNTL calls because the R&D Unix dmdld
+	had turned the uppermost bit on for some reason.
+
+5/1	Addition of one second delay after switching to layers mode to
+	allow time for the terminal to initialize.
+
+7/1	Allowed layers to come up even if not setuid-root.  When not setuid-
+	root, can't write /etc/utmp unless it is world writable, and can't
+	change ownership of pseudo-ttys.
+
+9/1	Strip off 8th bit when inquiring the terminal for it's escape
+	sequence identifier.  This allows getting into layers no matter
+	what the parity setting.  Also allowed for missing square bracket
+	in the returned escape sequence in case the wproc terminal controls
+	option is set to 8 bits.  Will print out the id strings in a
+	readable format if they are not recognized.
+
+10/1	No longer requires empty files in $DMD/lib/layersys for each terminal
+	id string to get into layers.
+
+12/1	Added NO_TIOCUCNTL to support machine types on which the TIOCUCNTL
+	ioctl on pseudo-ttys is not supported.
+
+12/9	Added getagentanswer() libwindows call to get access to the return
+	buffer from an agent call.  This is used by the agent(1) program to
+	display the return buffer in ascii for agent calls like A_ROMVERSION.
+
+12/14	Added '-V' option to print out version.
+	Made lyrscfg.h to contain defines for different operating system
+	configurations.
+	Added support for mips-based OS's, specifically StarServer-FT,
+	thanks to many changes by John Ampe.  This OS is a combination of
+	System V and BSD.
+	One notable addition is USE_NAMED_PIPE to use named pipes to
+	communicate with support programs rather than unix-domain sockets.
+	Another is support for system V utmp file format, although it is
+	known to be buggy.
+	Changed default shell to /bin/sh instead of /bin/csh because csh is
+	not available on all systems.
+	Added support for AT&T SVR4, USE_PTMX.
+
+1993
+====
+2/1	Added -e option to force on hex encoding mode the same way that
+	the environment variable DMDLOAD=hex does.
+
+3/1	Increased number of pseudo-ttys supported from 96 to 256 on
+	machines using the original bsd naming conventions
+	(/dev/[pt]ty[pqrstuvwxyzPQRSTU][0-f]).
+
+	Change to pass unrecognized agent calls on to the terminal rather
+	than rejecting them immediately.
+
+3/10	Added more portability defines for HP-PA thanks to Mark Larsen.
+
+4/19	Added beginning of support for Solaris from Bob Pietkivitch.
+	Added John Lash's '-m' option for larger packet size support on 730s.
+	Got to compile without warnings on NCR 3000 SVR4 with both the AT&T
+	and MetaWare compilers.
+	Removed old sunos pty driver patches from misc directory.
+
+4/21	Change to always return the result from an agent call in the agent
+	answer buffer.
+	Add flow control on agent calls to make sure all data from the
+	pseudo-tty is drained before processing the agent call.
+	Add support for A_JBOOT, A_JTERM, and A_JZOMBOOT even if on a system
+	that has TIOCUCNTL.  The purpose is to be able to use the above
+	flow control and to provide for transition to operating system
+	versions that don't support TIOCUCNTL (such as sun -> solaris).
+	Change libwindows to send the $DMDCHAN with the request if set
+	before looking up ttyname() because it's much faster.
+
+4/22	Add matchtty() call to match pty name on major/minor number if a
+	match is not found by name.  This is for systems that have two /dev
+	names for the same ptys: the one that layers sees may not be the
+	same one that ttyname() sees, and having layers() call ttyname() is
+	much slower.
+	Change to print error message to opened window if can't allocate
+	pty; previously the window was silently deleted.
+	Made a more reasonable algorithm for determining timeout times
+	based on the baud rate.  If the user does not specify '-b' baud
+	rate, the maximum is assumed to be 4800 baud to allow for network
+	delays and other delays; the timeout for 4800 baud is now 6 seconds
+	for transmit and 4 seconds for receive, double the preceding minimum
+	(and the mimimum was usually selected).
+	Eliminated PXTIMEOUT and RXTIMEOUT defines and instead use the value
+	for 1200 baud in the table at initialization time.
+	Put in a one second delay when forking a process to create a new
+	window to allow time for the process to open the pty before layers
+	tries to read it.
+
+4/27	Ignore leading blanks in a '-f' file.
+	Fixed a problem with starting up multiple dmdld's from a '-f' file
+	(only for libwindows programs that use A_JBOOT, not those using the
+	JBOOT TIOCUCNTL ioctl): too many packets get sent on channel 0
+	before being acked so some of them fail allocating a buffer to send
+	the JBOOT message.  The fix is to delay agent messages if there are
+	unacked messages on channel 0, using the agentblock flag.
+
+4/28	Got rid of wtinit.  It was just a simple program that sent the
+	startup string for layers, with hex encoding on or off.
+
+5/4	Removed setenv.c and getenv.c.  Just use standard putenv/getenv instead.
+
+5/5     Created 'grantpt' and 'movelogin' library programs.  These are small
+	programs that are to be installed setuid root to grant ownership
+	of pseudo ttys and to move entries around in the utmp file, respect-
+	ively.  Now layers itself no longer needs to be setuid root.
+	'Grantpt' is not needed on SVR4 because a similar program comes
+	with the system, accessed through a library call that is called,
+	not coincidentally, 'grantpt()'.
+	In addition, layers (via 'movelogin') correctly handles System V
+	format utmp files.
+	There is no longer a utmp entry for every window created.  Only one
+	window gets an entry, just like on the XT-driver layers.  The entry
+	is initially given to channel 1, but the user can move it to any
+	channel via a new agent call A_RELOGIN.  If the window that has the
+	utmp entry is deleted, layers reallocates a pty reserved for that
+	that channel and uses it when/if the window is reopened.
+
+5/7	Finished support for larger packet sizes.  Send the A_XTPROTO message
+	when starting up.  When response is received, send JXTPROTO if larger
+	packet sizes are to be used.  If no '-m' or '-b' option is used and
+	larger packet sizes are supported, 64 byte packets will be used unless
+	the baud rate claims to be 1200 baud or less; then 32 byte packets
+	are used.  Don't want to go higher than 64 because sometimes the stty
+	baud rate can't be believed.  The user can choose a larger packet size
+	with '-m'.  Also, if '-b' is 9600 baud or higher, 128 byte packets will
+	be used.
+	Added agentcom(), A_JXTPROTO, A_JTIMO, and A_JTIMOM to send these
+	control messages to the terminal in a flow-controlled manner.
+
+5/11	Added '-s' option to print protocol statistics to stderr on exit.
+	No longer fclose stdout and stderr upon startup.
+
+5/12	Removed checking for "fast" in rcfile(); it wasn't having any effect
+	anyway.
+	Renamed 'bsdagent.h' to 'hostagent.h'.  This will cause a problem for
+	the few support programs that had to include bsdagent.h, but most of
+	them are probably going to need modification anyway to use the
+	new "ioctlagent(...A_J..." equivalents to the "ioctl(...J..." calls.
+	'Bsdagent' is now really a misnomer since pseudo-tty layers works
+	on many other machine types.
+	Removed include/sys/sccsid.h from package.
+	Made libwindows that works with both pseudo-tty layers and XT-driver
+	layers.
+	Added getagentansresult() and getagentanschan() libwindows calls to
+	return the first and second shorts respectively from an agent call
+	response.  These are now used by the agent program.
+	Added xtagent, xts, xtt, and relogin programs to the package.  Xtagent
+	is the same as the popular agent AT&T exptool with the name changed
+	for machines that have both installed.  The latter 3 programs are
+	equivalent to programs in the XT-driver layers package.
+
+5/13	Added A_CHANGEPROC agent call to change the owner process of a channel.
+	This is sent by the Runlayer() libwindows function to notify layers
+	that a new process has been started in the window so layers can kill
+	it when the window is deleted.
+	Added inlayers() call to libwindows; returns 0 if not in layers, 1
+	if in xt-driver layers, or 2 if in pseudo-tty layers.
+	Added Runwaitlayer() libwindows function.
+
+5/18	Added relogin, xtagent, xts, xtt, and xtproto man pages.
+
+5/19	Added Jboot(), Jzomboot(), Jterm(), and Jwinsize() libwindows calls.
+
+5/20	Increased the sleep time before starting to talk XT protocol from
+	1 second to 3 seconds.  The 5620 needs 3 seconds.  Modified
+	recvagent() to recognize the length of the received agent packet
+	from the terminal.
+
+5/24	Removed "-i" parameter to forked shells.
+	Allowed autocurrent to be turned of on any terminal, not just 630s.
+	Look for all layers support files under $DMDSYS if they're not found
+	under $DMD.  $DMDSYS defaults to "/usr".  This allows separation of
+	the software development package from the layers package.
+
+5/26	Split the openchan() libwindows routine into findchanname() and
+	openchanname().  This is needed in Runlayer() to get obtain the
+	channel name synchronously in the parent process and still have
+	"/dev/tty" work properly for the child process.
+
+5/27	Added USE_IGNORESIGCHLDGRANTPT for Solaris.
+	Removed usages of dup2.  They weren't needed, and it's not available
+	on the current version of Amdahl uts.
+
+5/28	Modified recvagent() to indicate agent call failure only when the
+	return code is -1, not when it's non-zero.  The 730windows agent calls
+	currently return the agent number (non-zero) when the call succeeds.
+
+6/3	Added $DMDAGENTDIR environment variable passed from layers to 
+	libwindows.  This is the directory that layers uses for the socket
+	or named pipes.  It takes precedence over $DMD and the compiled-in
+	default for $DMD.  This eliminates problems caused by either a
+	libwindows compiled with different defaults from layers or the user
+	change $DMD after getting into layers.
+
+6/4	Added setagenterrf() libwindows call for programs that don't want
+	errors sent to stderr.
+	Made libwindows open "/dev/tty" if none of stdin, stdout, and stderr
+	are connected to a tty.
+
+6/7     Added USE_SYSVLIKE and USE_SYSVR4LIKE defines to lyrscfg.h.  This
+	makes it easier for systems on which layers is compiled on both
+	SVR4 versions and non-SVR4 versions of the OS.  On those systems
+	either set EXTRACFLAGS=-DUSE_SYSVR4LIKE in the top level makefile
+	or edit lyrscfg.h to put "#define USE_SYSVR4LIKE" at the top to
+	compile SVR4 versions.
+
+6/8	Fixed writes to the terminal to re-try write if write returns EINTR
+	error; implemented check_write().  This solves the mystery of many
+	lost packets, NAKS, and timeouts.
+	Added buffered writes; implemented buf_write() and flush_write().
+	If there is data waiting to be read from any source, layers buffers
+	up data to the terminal and only does a write() when either the
+	buffer gets full or there is no more data to be read.  This allows
+	larger writes() to the terminal which is more efficient and allows
+	better packing of data over some networks for better performance.
+
+6/18	Added DEFDMD make variable to allow compilation in a different
+	location from the default $DMD variable.
+
+6/21	Added onloginlayer() call to libwindows.  Routine determines whether
+	or not the application is running on the logged-in window.  Many
+	applications get confused by broadcast messages that are sent to
+	windows that show up in the utmp (who) file.  'Xtagent -l' returns
+	the same information for shell scripts.
+
+7/2	Changed all sleeps to use select() with no file descriptors and
+	a timeout (mysleep function) to avoid apparent interactions of the
+	sleep() and alarm() calls on some versions of unix (in particular
+	Mips RISC/os).
+	Added DMDMAXPKT environment variable to set default XT packet size
+	just like -m option.
+
+7/7	Added comments to almost all source files stating that the source
+	is freely distributable.
+
+7/27	Network XT support added.  If the terminal supports network XT and
+	it's connected to a network, network XT will automatically be used.
+	Override with 'DMDLOAD=regular' to drop it down to regular XT or
+	'DMDLOAD=hex' to drop down to regular XT with hex encoding.  The
+	same thing can be done with the '-r' and '-x' options, respectively.
+
+7/28	Added '-d' to selectively enable debugging messages at run-time.
+	Added '-o' to select name of the file that messages go into.
+
+7/28	Expanded usage message to provide short description of each option.
+
+7/29	Trace information enhanced to decode protocol information similar
+	to XT-driver layers' 'xtt' program.
+
+7/30	Added '-h' flag and '$DMDHIGHWATER' environment variable to set the
+	high water mark for network xt.
+
+8/16	Changed the 'ifdef USE_TERMIO's into 'ifndef NO_TERMIO's so that the
+	default on SunOS systems is to use termio rather than sgtty.  I was
+	getting trouble with sgtty on dmdld on SunOS systems and termio works
+	fine so I decided to change the SunOS systems to use termio like every
+	other supported system.
+
+8/16	Added 730 and 730+ to the 630 termcap entries in misc/MTG.termcap and
+	added MTG.terminfo for corresponding terminfo entries.
+
+9/3	Allow zero-length "lsys" file parameters when not on 5620s.  The 705
+	has a built-in function key that runs "layers /dev/null".
+	Added '-l' option to allow running nested layers within a layers
+	session.  Previously I had allowed it without an option and just
+	printed a warning.  I know of no terminal that currently supports
+	running layers within layers but theoretically it could work.
+
+9/7	Clear c_lflag completely on termio-based systems because there can
+	be new flags that should be turned off.  Formerly it only turned off
+	certain known settings.  In particular, 'IEXTEN' is bad and it was on
+	by default on Solaris systems.
+	Wait some time for child processes to die after sending them a SIGHUP 
+	because at least on SVR4 systems closing the pseudo-tty sends another
+	SIGHUP and that can cause editors such as 'vi' to abort while saving
+	files.
+	Add parameter to crc() function to control whether or not to write
+	crc back out to the buffer.  This allows displaying the actually
+	received crc in the debugging info when a bad crc is received rather
+	than displaying the expected crc.
+
+9/9	Added printing out of system error messages in libwindows when binds
+	failed on systems that use unix domain sockets (those that used
+	named pipes already had the messages).
+
+9/17	Aack! Had forgotten to add the parameter to the crc() function when
+	calculating crcs for ACKs sent to the terminal.
+	Added some XT statistics which were missing from the network XT
+	protocol: transmit packets, transmit bytes, and receive bytes.
+
+9/21	Hadn't properly set up the externs in process.c to go with the
+	middle change of 9/7.  Compiled on some systems but not on others.
+
+9/23	Modified mysleep() to hold SIGALRM signals while sleeping.  This 
+	prevents it from getting interrupted by the XT timeout alarms.
+	That was causing a very bad problem with the middle change of 9/7:
+	the mysleep() delays there were always getting interrupted and
+	the delay code was designed to keep retrying mysleep while it is
+	interrupted so it got into an infinite loop.  Also modified that
+	retry to not retry for ever.
+
+9/24	If the user specifies regular xt or hex encoded regular xt and 
+	a max packet size of 32, don't bother to ask the terminal if it
+	supports any better with A_XTPROTO.  This is mostly to support
+	terminal-side XT implementations that don't respond at all to 
+	the A_XTPROTO request like they're supposed to.
+	Fixed bug where exitagent() deletes sockets/named pipes belonging
+	to a different layers session; was incorrectly looking for
+	ttyname*.  For example, layers session on pts/1 would delete
+	sockets for layers session on pts/10, etc.  Thanks to Paul Connors.
+
+10/18	Removed checking in ptyioctlagent() for channel numbers between
+	0 and 7.  This is because some of the 730windows agent calls use
+	negative numbers in the channel number slots.
+
+10/21	Fixed bug that prevented "grantpt -r" from properly releasing the
+	slave-side pty permissions (i.e. giving it back to root) on machines
+	with BSD ptys (e.g. SunOs).   Had to clear the close-on-exec flag
+	of file descriptor for the master side of the pseudo-tty before trying
+	to do that.
+
+11/9	Changes to support compiling with an XT-driver-style jioctl.h: include
+	lyrscfg.h in layers files that had only included jioctl.h, define
+	the XTJ*3 defines inside of hostagent.c, and only define USE_HOSTAGENT
+	in lyrscfg.h if it isn't already defined.
+
+11/10	Incorporated some changes I had been saving up:
+	  - The Makefiles now use "$DMDSYS" instead of "$DMD" as the base
+	    of installation.  "$DMD" is the default value of "$DMDSYS" for
+	    backward compatibility.
+	  - Reorganized lyrscfg.h to have "major option groups" and "machine
+	    specific type options".
+	  - Incorporated some of the changes from Paul Connors to support
+	    Mips Risc/OS /EPIX operating system. 
+
+12/2	Aargh! I had forgotten to take out a hack which made an 8;7;5 5620
+	(version 2.0 roms) be treated like an 8;7;3 5620 (version 1.1).
+	This hack made 8;7;5 5620s unusable, causing layers to attempt to
+	use 32ld to download set_enc.j and lsys.8;7;3.
+
+	Also, to be more consistent with xt-driver layers, make last window
+	created in a layers startup file current, unless a user explicitly
+	specifies a "current" command in the startup file.
+
+12/3	Undid the extra inclusions of lyrscfg.h done on 11/9 because it turns
+	out it was already included via common.h which includes hostagent.h
+	which includes lyrscfg.h.  Also, I forgot to mention that sometime
+	before 12/2 I turned off the default define of "FAST" in lyrscfg.h
+	because it only took effect if layers was setuid-root anyway.
+
+12/22	Fix in grantpt thanks to Mark Larsen for Mips machines that implement
+	the /dev/ptc clone pty device.  Need to compare the master pseudo-tty
+	major number to the /dev/ptc minor number rather than the /dev/ptc
+	major number.
+
+12/23	Minor improvement to libwindows in findchanname() (and openchan()
+	since it calls findchanname()) to automatically call closeagent()
+	under pseudo-tty layers if it has to call openagent() because the
+	user hadn't done it.  This prevents requiring the user program to
+	call closeagent() if openchan() is the only libwindows call that
+	the user makes (like in dmdpi).
+
+1994
+====
+
+1/10	Added a function "setagenttermiof()" in libwindows to allow a user
+	program to define a function that returns a pointer to a termio
+	structure that defines non-raw mode tty settings.  This is for
+	programs that use Runlayer() but have their tty set into raw mode.
+
+1/25	Solaris has a problem with unlinking a socket before the socket
+	file descriptor is closed; sometimes later binds then fail.
+	Changed agent.c and hostagent.c to compensate.
+
+2/7	Discovered that "termios" functionality should be used on operating
+	systems that provide it; "termios" is an extension to "termio" with
+	extra stty settings.  In order to transfer all stty settings to
+	another tty as layers does, "termios" is needed.  Added the code
+	to use it and have it turned on by default unless NO_TERMIOS is
+	defined.  Also added support in libwindows for systems that have
+	neither "termio" or "termios" (e.g. BSD systems) because that was
+	missing.
+	At the same time, redefined the interface added on 1/10 to accomo-
+	date different types of tty handling on different operating systems.
+	Instead of "setagenttermiof()" in libwindows there is now instead
+	"setagentnonrawf()" to pass in a pointer to a different user-defined
+	function.  The user-defined function gets a file descriptor as a
+	parameter, sets that file descriptor into non-raw mode, and returns
+	-1 upon failure or something other than -1 upon success.
+
+4/25	Added support for linux in the top level Makefile and lyrscfg.h.
+
+5/12	Added a hint message that $DMD/xt or $DMDSYS/xt has to be world
+	writable if the socket or named pipe can't be created.  Also,
+	for systems that use sockets, it wasn't properly trying to bind
+	$DMDSYS/xt if $DMD/xt failed even though the error message said
+	it did; fixed that so it tries both directories.
+
+5/16	Changed libwindows/hostagent.c to always write a couple characters
+	to the window after opening a remote channel for XT driver-based
+	layers.  This had already been done for streams XT, and now it was
+	also needed for character XT on amdahl 2.1.6a.  Made characters
+	written out to be space-return so hopefully they shouldn't be
+	noticed.
+
+1995
+====
+
+3/9	Discovered that an "xtagent E" would result in the C_JAGENT response
+	packet in getting sent to the shell after layers exitted rather than
+	being read by layers, at least on a 630.  Added istermagentpending()
+	to agent.c and added the places in control.c that use it to make
+	sure that the response packet gets read up.  There was already logic
+	in place to read an extra C_UNBLK from a 5620, and I reused that.
+	I am not sure what would happen if "xtagent E" on a 5620 results in
+	both a C_UNBLK and a C_JAGENT; I have no way of testing it.
+
+3/23	Backed out the change from 3/9 because discovered a better solution
+	that was more robust.  It turned out that the TIOCFLUSH ioctl that
+	was called in preference to a TCFLSH ioctl did not drain standard
+	input like it was supposed to on a Sunos 4* system just before
+	layers exits.  Changed boot.c and utmp_tty.c to try both TIOCFLUSH
+	and TCFLSH if both are defined.
+
+5/31	Added required second parameter to gettimeofday in misc/movelogin.c 
+	for the case of USE_UTXENT.  This is needed especially on Unixware
+	2.01 but it should have been there all along.
+
+6/23	This is not a change to layers, but a change to the software
+	development package I want to note: I changed pcc2/common/manifest.h
+	to add extern void exit() and #include "string.h" to get sty and
+	therefore mc68ccom to compile on Solaris 2.4 and Unixware 2.01.
+
+6/26	Added USE_ALT_PUTUTLINE and USE_ALT_PTYALLOC for use on HP-UX 9.0.
+
+6/28	Added NO_WINSIZE option to be able to compile on a system that 
+	doesn't have TIOCSWINSZ, for example HP-UX 8.0.
+
+7/10    Added "-Xt" to the EXTRACFLAGS comment in Makefile for Unixware
+	2.01, to keep it from complaining about redeclaring "malloc" in
+	sty.c in pcc2/common in the 630 software development package.
+
+11/20   Expanded EXTRACFLAGS comment in Makefile for Solaris 2.0 to include
+	IRIX 5.3 or later.  Also, for the record, I removed the following
+	from the README file for the combined ptlayers/sdp630 because I
+	don't currently know of any cases that it applies to:
+
+	Also see the comments on the "EXTRACFLAGS" variable in the
+	ptlayers/Makefile because for some operating systems it is better
+	to only set the EXTRACFLAGS for ptlayers and not sdp630; if there
+	is a comment in ptlayers/Makefile for your operating system and not
+	in the top level Makefile, edit the ptlayers/Makefile AND invoke
+	the ptlayers and sdp630 Makefiles directly instead of going through
+	the top level makefile.  This will avoid using the same EXTRACFLAGS
+	for both packages.
+
+1996
+====
+7/26	Minor changes to support compiling with gcc:
+	- lib/libwindows/Makefile explicitly used 'cc' instead of $(CC).
+	- This is not a change to layers, but to dmdld and 32ld: there is a
+	  default optimization in gcc that makes memcpy a builtin function
+	  and assumes that structures are aligned on 4-byte boundaries.
+	  Dmdld and 32ld were using structure pointers to point to relocation
+	  entries which are 10 bytes each and are sometimes not aligned.
+	  Changed one of the pointers to char * so memcpy wouldn't make
+	  any assumptions.
+	- Also, gcc had a problem with mktemp("string_constant") in 32ld.
+	  Apparently the string constant is placed in a read-only section.
+	  Changed the calls to mktemp(strdup("string_constant")).
+
+1997
+====
+8/27	Changed Makefile to show preferred flags for IRIX: remove -lsocket
+	  and -lnsl and add -cckr to keep it from complaining about redeclaring
+	  "malloc" in pcc2/common in the 630 software development package.
+	  These are especially needed for IRIX 6.x but they work on IRIX 5.x.
+10/29	Attempted to port to amdahl's UTS system:
+	  - Added USE_POLL conditional compile to use poll(2) instead of select
+	  - Added USE_PTY_FOR_PIPE because UTS's poll can't poll from a
+	    named pipe
+	  - Added setraw() function as a subset of setcntrl() which only
+	      sets raw mode, for use in USE_PTY_FOR_PIPE
+	  - Changed calls to fchmod to chmod (and added ttyname parameter)
+	      in setcntrl, resetcntrl, and slavettyset because UTS doesn't
+	      have a fchmod.  This slightly changes the behavior on
+	      the "C_BRAINDEATH" control because it will change the mode
+	      on the slave side of the pty instead of the master side,
+	      which is the right thing to do anyway.
+	  - Changed termio_setcntrl() and termio_resetcntrl() to use the
+	      "saveterm" tty settings structure that was saved in savemode()
+	      rather than using their own "ttysave" structure.
+	  Unfortunately, the port did not succeed because of a bug for which
+	    I could not find a workaround, at least in release 2.1.2: when
+	    more data is available in a pty than is read, data disappears
+	    in the queue until another write occurs to the slave side of
+	    the pty, either with a poll or a read with O_NDELAY on or a
+	    regular read without O_NDELAY.  This causes dmdld downloads
+	    and xtagent "!" commands to fail.
+	  Other remaining problems: I once saw the retried write in 
+	    check_write after an EINTR hang.  May need to reorganize things
+	    to avoid alarms going off inside that write.  Also, there's always
+	    one defunct process owned by layers.
+
+	Changed the exitagent() sequence to take advantage of a new Solaris
+	    (at least) feature of being able to move utmp entries without
+	    needing to make 'movelogin' setuid-root: the new pututxline()
+	    will set a utmp entry if it has write access to the tty that is
+	    being set, and the layers control channel is set to exclusive
+	    access mode (TIOCEXCL) until after resetcntrl().  Moving
+	    moveutmp() until after resetcntrl() solves the problem and
+	    allows movelogin to not be setuid-root.  Since SVR4 already had
+	    a grantpt() system call to avoid the need for the grantpt
+	    setuid-root support program, this allows layers and all support
+	    programs to be completely non-root on Solaris.
+
+
+1998
+====
+2/11    Found that Linux 2.0 has "getutline" and "pututline" so removed the
+	  '#undef USE_UTENT' from lyrscfg.h for linux and instead added two
+	  new defines NO_UT_EXIT and USE_VOID_PUTUTLINE and implemented the
+	  minor differences in misc/movelogin.c
+
+	Also made these additional changes to the 630 software development
+	  package for Linux at this time:
+	    1. added "-fno-asm" to the recommended flags for Linux to avoid
+		clashes with the keyword "inline" in building mc68ld.
+	    2. changed ccs/pcc2/common/scan.c to cast NULL to an (int) because
+		apparently its default type is something else on Linux.
+	    3. changed a line ccs/as/common/pass0.c and in ccs/ar/common/ar.c
+		from 'static char *seed="AAA"' to 'static char seed[4]="AAA"'
+		to make gcc put the string into writable memory.
+	    4. changed some format strings "0x%l.8x" to "0x%.8lx" in
+		ccs/pcc2/mc68/local.c.
+	    5. changed variable called "abort" to "getout" in
+		dmdversion/dmdversion.c.
+	    6. added putenv("POSIXLY_CORRECT=yes") before the call to getopt
+		in ccs/dmdcc/mc68/dmdcc.c to make getopt behave properly.
+	    Also, yacc bombed on a few ".y" files so had to make
+	    ccs/pcc2/mc68/(cgram.c|sty.c) and ccs/ld/mc68/y.tab.[ch]
+	    on a Solaris system and copy the results over.

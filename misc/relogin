@@ -1,0 +1,1 @@
+xtagent RELOGIN ${1:-}

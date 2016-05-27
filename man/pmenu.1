@@ -1,0 +1,84 @@
+.TH PMENU 1 "630 MTG"
+.SH NAME
+pmenu \- program the 630 MTG Windowproc Button 2 menu
+.SH SYNOPSIS
+.B  pmenu
+.RB [ \-f " file]"
+[ \-c ] [ \-C ]
+.SH DESCRIPTION
+\f2Pmenu\f1
+will program the Button 2 windowproc menu for the layers
+window it is invoked in.
+\f2Pmenu\f1 reads a configuration file (\f2.mtgmenurc\f1 or the file
+specified by the \f2\-f\f1 flag) that describes the menus to be added.
+Each line of the configuration file consists of three arguements:
+.ftCW
+.ti +5
+.br
+depth "item" "string"
+.br
+.ft1
+\f2Depth\f1 can have values from 0 (the top depth menu) to 3 (three levels down) and
+describes where the item is to be placed.
+Quotes must enclose both the \f2item\f1 and \f2string\f1 fields.
+The \f2"item"\f1 field
+will be printed as an entry in the menu at that
+depth. The \f2"string"\f1 field
+are the characters that will be transmitted to the
+host when the corresponding \f2"item"\f1 is selected with the mouse and
+Button 2.
+A \f2\\n\f1 placed in the \f2"string"\f1 field
+allows a newline to be transmitted to the host.
+When Button 2 is used to select an item either a string is transmitted
+to the host or a sub-menu is displayed.
+.PP
+\f2Pmenu\f1 creates menu entries in the order they appear in the configuration
+file. When a line in the configuration file
+at depth n is followed by one at depth n+1, the depth n
+item becomes a pointer to the a sub-menu with the depth n+1 item as the top
+entry. Any \f2"string"\f1 bound to the depth n item will be ignored.
+When a line in the configuration file at depth n is followed by one
+at depth n-1, the depth n-1 line is placed at the end of the menu that
+contains the pointer to the depth n sub-menu.
+For example the following is a valid configuration file:
+.nf
+.ftCW
+.in +5
+.br
+0 "vi"
+1 "up" "k"
+1 "down" "j"
+1 "left" "h"
+1 "right" "l"
+0 "rlogin"
+1 "ucsd"
+2 "sdcc7" "rlogin sdcc7\\n"
+2 "sdcc10" "rlogin sdcc10\\n"
+1 "berkeley"
+2 "monet" "rlogin monet.berkeley.edu\\n"
+2 "okeeffe" "rlogin okeeffe.berkeley.edu\\n"
+2 "ucbvax" "rlogin ucbvax.berkeley.edu\\n"
+.br
+.ft1
+.fi
+.in -5
+.PP
+This creates a pointer \f2vi\f1 to a sub-menu with four entries in it,
+and a pointer \f2rlogin\f1 to a sub-menu with pointers to two sub-menus.
+.PP
+The command-line options are:
+.TP 8
+.BI \-f " file"
+Specifies that "file" be used as an initial configuration file
+instead of the default "$HOME/.mtgmenurc" file.
+.TP 8
+.B \-c
+Specifies that all menus added to Button 2 in this window be cleared before
+reading the configuration file.
+.TP 8
+.B \-C
+Specifies that all menus added to Button 2 in this window be cleared (the
+configuration is not read).
+.PP
+See the 630 Multi-Tasking Graphical Terminal User's Guide for more information
+about programming the Windowproc Button 2 menu.

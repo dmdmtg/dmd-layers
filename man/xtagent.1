@@ -1,0 +1,155 @@
+.\" use "-rZ1" for exptools
+.tr ~
+.if \nZ=0 .ds x} XTAGENT 1 layers
+.if \nZ=1 .ds x} AGENT 1 EXPTOOLS
+.TH \*(x}
+.SH NAME
+.if \nZ=0 xtagent
+.if \nZ=1 agent
+- send agent calls to a layers terminal
+.SH SYNOPSIS
+.if \nZ=0 .B xtagent
+.if \nZ=1 .B agent
+[-clav] agentcall|"!com"|"&com" [chan|- [up to 4 args]]
+.SH DESCRIPTION
+.if \nZ=0 .B Xtagent
+.if \nZ=1 .B Agent
+sends agent commands to a 5620/630/730 to manipulate windows.  Many of the
+agent commands are similar to the commands on the terminal's button 3 menu.
+The agentcall can be a number as defined in "agent.h"
+.if \nZ=0 (in $DMD/include)
+.if \nZ=1 (in $TOOLS/lib/agent/include)
+or can be one of the names listed below.  Only the first
+character of an agentcall name is significant except for commands that are
+two "words"; in that case the first character of both words are required.
+For example, NEWLAYER requires both an 'N' and an 'L'.  Case in an
+agentcall name is insignificant.
+.PP
+The channel number defaults to the current window if missing but is required
+if extra arguments are required for the call.  A channel number of '-' also
+defaults to the current channel.  Channel numbers are assigned
+sequentially starting at 1 for the initial window on a 630/730, and you can
+use the -c option (see below) to find out a channel number of a window.
+.PP
+Here are the available agent calls by name.
+.IP "CURRENT" 3
+Make the window current.
+.IP "DELETE" 3
+Delete the window.
+.IP "TOP" 3
+Pop the window to the top.
+.IP "BOTTOM" 3
+Push the window to the bottom.
+.IP "NEW" 3
+Create a new window so that the upper left hand corner is at the X, Y
+coordinates specified as the first two extra arguments and so that the
+lower right hand corner is at the X, Y coordinates specified as the next
+two extra arguments.  Coordinates are the same as those specified in a
+"layers -f" file.  The passed-in channel number is ignored and a free
+channel is selected by the terminal.
+.IP "NEWLAYER" 3
+Exactly like NEW except no shell is created to run in the new window.
+.IP "MOVE" 3
+Move the window so that the upper left hand corner is at the X, Y
+coordinates specified in the extra arguments.
+.IP "RESHAPE" 3
+Reshape the window; arguments are the same as for NEW.
+.IP "EXIT" 3
+Exit layers.
+.IP "ROMVERSION" 3
+Return the rom version of the terminal.
+.IP "!com" 3
+Execute shell command "com" in a window.  If window coordinates are given,
+this behaves just like a NEW but the shell command is executed in it
+instead of $SHELL.  As in the "layers -f" file, the last command in "com"
+should be invoked with "exec".
+.IP "&com" 3
+Exactly like "!com" except that
+.if \nZ=0 .B xtagent
+.if \nZ=1 .B agent
+doesn't wait for the command to exit.
+NOTICE: character-xt-driver based layers does not know that this new process
+is associated with the target window, so deleting the target window will not
+kill this process.  Use "!com" so
+.if \nZ=0 .B xtagent
+.if \nZ=1 .B agent
+will kill the command when 
+.if \nZ=0 .B xtagent
+.if \nZ=1 .B agent
+itself is killed. This has the desired side effect of killing the command when 
+layers is exited, but has the unfortunate side effect of killing the command
+if the originating window is deleted.  If you run
+.if \nZ=0 .B xtagent
+.if \nZ=1 .B agent
+in the background, this will still work.
+.PP
+The following agentcalls are available only on 730 terminals running
+.BR 730windows .
+See
+.BR 730windows (1)
+for information about parameters to these agentcalls.
+.IP "CREATESCREEN" 3
+Create a new screen.
+.IP "DESTROYSCREEN" 3
+Destroy current screen.
+.IP "NEXTSCREEN" 3
+Jump to the next screen.
+.IP "PREVSCREEN" 3
+Jump to the previous screen.
+.IP "NEWHOST" 3
+Initialize a new host.
+.IP "EXITHOST" 3
+Exit a host.
+.IP "TILELAYER" 3
+Change window into a small box (iconify).
+.IP "UNTILELAYER" 3
+Restore window from the small box (uniconify).
+.IP "HOSTDIALER" 3
+Set a host dialer.
+.IP "DIALRESET" 3
+Rest a dialer.  Used by
+.BR 730setdial (1).
+.IP "DIALCONCAT" 3
+Add 8 bytes to a dialer string.  Used by
+.BR 730setdial (1).
+.SH OPTIONS
+.IP "-c" 3
+Print out the channel number returned from the terminal to standard output.
+This is useful when doing a NEW to determine which channel was selected.
+You can also use
+.if \nZ=0 .B Xtagent
+.if \nZ=1 .B Agent
+-c by itself (except on old versions of pseudo-tty layers) to determine the
+channel number of the current window.
+.IP "-l" 3
+Determine if on logged-in layer and return true or false.
+.IP "-a" 3
+Print out the response in ascii.  This is the default for ROMVERSION.
+.IP "-v" 3
+Verbose mode, for debugging.  Prints out what is sent and received in
+the agent call.
+.SH EXAMPLES
+.if \nZ=0 .B Xtagent
+.if \nZ=1 .B Agent
+is particularly useful from within the "layers -f" startup file on a 630/730
+to be able to re-use channels that are freed up by downloaded programs.
+Here is a sample from one of those startup files:
+.br
+.nf
+~~~~8 960 64 1016 exec dmdlock -u
+.br
+.if \nZ=0 ~~~~56 480 968 900 echo "please wait";sleep 55;xtagent NEW 1 32 32 944 452;xtagent NEW 1 32 504 944 924;xtagent MOVE 1 56 56;xtagent CURRENT 1;exec $SHELL
+.if \nZ=1 ~~~~56 480 968 900 echo "please wait";sleep 55;agent NEW 1 32 32 944 452;agent NEW 1 32 504 944 924;agent MOVE 1 56 56;agent CURRENT 1;exec $SHELL
+.PP
+To create a window, run "mailx" in it, and delete the window when
+mailx finishes:
+.br
+.if \nZ=0 ~~~~CHAN=`xtagent -c NEWLAYER 1 32 32 944 452`
+.if \nZ=1 ~~~~CHAN=`agent -c NEWLAYER 1 32 32 944 452`
+.br
+.if \nZ=0 ~~~~xtagent "!mailx" $CHAN
+.if \nZ=1 ~~~~agent "!mailx" $CHAN
+.br
+.if \nZ=0 ~~~~xtagent DELETE $CHAN
+.if \nZ=1 ~~~~agent DELETE $CHAN
+.fi

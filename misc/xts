@@ -1,0 +1,15 @@
+#
+# Layers writes out the info to /tmp/xts.pid where pid is the process id of
+#  the process that does the agent call.  The only way to get the process id
+#  from the shell is by running the process in the background.
+#
+xtagent XTS &
+TMPFILE=/tmp/xts.$!
+trap "rm -f $TMPFILE" 0 1 2 15
+wait
+if [ -f $TMPFILE ]
+then
+    cat $TMPFILE
+else
+    exit 1
+fi

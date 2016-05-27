@@ -1,0 +1,28 @@
+.ds ZZ CORE PACKAGE
+.TH JTERM 1
+.SH NAME
+jterm \- reset a layer
+.SH SYNOPSIS
+.B jterm
+.SH DESCRIPTION
+The
+.I jterm
+utility
+is used to reset the a layer of a windowing terminal
+(such as 5620 DMD, 630 MTG or 730 MTG terminal) after invoking
+\fItplot, proof,\fP 
+or other programs that change the terminal attributes.
+It is useful only under \fIlayers\fR(1).
+In practice,
+it is most commonly used to restart
+the default terminal emulator after using an alternate
+one such as
+.I hp2621
+or
+.IR tek4014 .
+In standalone mode, rebooting the
+terminal should be used to restore the normal terminal program.
+.SH SEE ALSO
+hp2621(1), layers(1), proof(1), 
+tek4014(1),
+tplot(1G).

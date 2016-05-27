@@ -1,0 +1,13 @@
+.TH PLABEL 1 "630 MTG"
+.SH NAME
+plabel \- Install a string in the label area of a window.
+.SH SYNOPSIS
+.B plabel [-f][-l|-c|-r <string>]
+.SH DESCRIPTION
+.I Plabel
+will place text into the label area of the window it is invoked in.
+The \fB-l -c -r\fR will place the text in \fIstring\fR at the
+left, center or right part of the label area.
+The \fB-f\fR will clear
+the label area of a window. If a \fIstring\fR is longer
+than can be displayed, it will be clipped to fit.

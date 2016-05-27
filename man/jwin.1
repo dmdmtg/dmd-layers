@@ -1,0 +1,33 @@
+.ds ZZ CORE PACKAGE
+.TH JWIN 1
+.SH NAME
+jwin \- print size of layer
+.SH SYNOPSIS
+.B jwin
+[-a]
+.SH DESCRIPTION
+.I Jwin
+runs under \fIlayers\fR(1) and is used to determine the size of the
+current layer.
+If you use the "-a" option,
+.I jwin
+attempts to get the window size even if not in layers.
+.PP
+.I Jwin
+prints 2 lines.
+The first line shows the width and the height of the layer
+in bytes (number of characters across and number of lines, respectively).
+The second line shows the width and height of the layer in dots.
+.SH SEE ALSO
+layers(1).
+.SH EXAMPLE
+.nf
+.ft CM
+$ jwin
+bytes:  86 25
+bits:   780 406
+$
+.fi
+.ft R
+
+

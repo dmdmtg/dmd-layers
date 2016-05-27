@@ -1,0 +1,382 @@
+.tr ~
+.TH LAYERS 1
+.SH NAME
+layers \- layer multiplexor for windowing terminals
+.SH SYNOPSIS
+.B  layers
+.RB [ \-V ]
+.RB [ \-xrstl ]
+.RB [ \-m " max-pkt]"
+.RB [ \-h " high-water]"
+.RB [ \-b " baud]"
+.RB [ \-f " startupfile]"
+.RB [ \-d " debuglevel]"
+.RB [ \-o " debugfile]"
+[lsys]
+.SH DESCRIPTION
+\f2Layers\f1
+manages communications between a windowing terminal 
+and the host computer on which it is running.
+Each layer or window is functionally identical to a separate terminal.
+Characters typed on the keyboard are sent to the standard input of
+the \s-1UNIX\s0 system process attached to the current
+window (called the host process), and characters written on the
+standard output by the host process appear in that window.
+When a window is created, a separate shell is established and bound
+to the window. If the environment variable \s-1\f3SHELL\f1\s0 is set, the user
+will get that shell, otherwise \f2/bin/sh\f1 will be used.
+.PP
+Windows are created, deleted, reshaped,
+and otherwise manipulated in a terminal-dependent manner.
+For instance, the \s-1AT&T\s0 630 MTG terminal provides
+a mouse-activated pop-up menu of layer operations.
+The method of ending a \f2layers\f1 session is also
+defined by the terminal and by option settings in the \f2layers\f1 program.
+.PP
+\f2Layers\f1 sends data to the
+terminal using regular or network XT protocol as described
+in \f2xtproto\f1(5). On
+the host, each window is represented by a child process of \f2layers\f1 
+called a host process.
+Each host process executes a shell and is connected to \f2layers\f1 through
+a \f2pty\f1 pseudo tty device with \f2layers\f1 on the master side pty
+and the host shell process on the slave side pty.
+Data arriving on the master side pty from standard
+output of the host process is assembled into XT packets and
+transmitted to the terminal for processing (which typically means display
+in a window). Data from the keyboard and terminal resident programs are
+extracted from the XT packets sent by the terminal to \f2layers\f1 and are
+written to the master side pty of the corresponding host process.
+The host process 
+receives this data on standard input through the slave side pty.
+\f2Layers\f1 also handles agent system requests from programs that use the 
+functions described in the \f2libwindows\f1(3) subroutines.
+.PP
+When first invoked, \f2layers\f1 transmits a sequence of characters to
+the terminal to determine what kind of terminal it is,
+if the terminal is already running \f2layers\f1, and if the terminal
+is using the
+\f2hex encoding\f1 mode for receiving and transmitting packets.
+\f2Layers\f1 then initiates the XT protocol mode on the terminal
+and all communication to the terminal uses XT packets from that point on.
+Once in the regular XT protocol mode, \f2layers\f1 further inquires of
+the terminal to determine if network XT protocol or large packet
+regular XT protocol should be used (this is skipped if the user specifies
+using 32 byte packets with regular XT or hex encoding).  If the terminal
+supports network XT and hex encoding is not being used, layers switches to
+network XT protocol mode. 
+.PP
+To prevent confusion to other UNIX programs such as \f2write\f1(1) or
+\f2talk\f1(1), \f2layers\f1 moves the
+the entry in \f2/etc/utmp\f1 corresponding to the physical
+login port to which the terminal is connected to the pseudo-tty for the
+first window, and restores it when it exits.  The \f2relogin\f1(1) command
+can be used to change the \f2/etc/utmp\f1 entry to another window.
+.PP
+To allow custom tailoring of the layers environment, 
+\f2layers\f1 will read the optional startup configuration file for runtime
+specifications and window commands.
+By default this is \f2$HOME/.layersrc\f1, but the \-\f3f\f1
+flag can be used to override the default.
+For more detailed information see the section on
+startup file syntax below.
+.PP
+Once the startup file has been processed, \f2layers\f1 will multiplex character
+I/O between the windows, agent system command datagrams and the terminal
+until it is
+told to exit by the terminal. The exact details of \f2layers\f1
+systems operations can be found in the user guides supplied with each
+terminal.
+.PP
+This version of 
+\f2layers\f1 also supports an \f2autodelete\f1 feature 
+that will respond to the termination of a host process.
+If the \f2autodelete\f1 option is enabled (the default) and a host process
+that is attached to a windows exits, \f2layers\f1 will
+automatically delete that window.
+When disabled, the \f2autodelete\f1
+option will not delete windows.
+If \f2layers\f1 is running
+in the \f2autodelete\f1 mode and the last attached window is deleted, 
+then \f2layers\f1 will
+clean up, restore the login terminal \f2/etc/utmp\f1 entry,
+force the terminal out of the XT packet mode, and then exit
+returning the user to the login shell.
+.PP
+The \f2autocurrent\f1 option when enabled (the default), modifies the
+action of the \f2autodelete\f1 mode to make
+make another window both 
+top and current before deleting a window when a host process terminates.
+The \f2autocurrent\f1 option does not apply to 
+terminal directed window deletes such as windows deleted
+by mouse commands.
+Both the \f2autodelete\f1 and
+\f2autocurrent\f1 mode can be turned off or on by commands in the startup file.
+.PP
+The command-line options are:
+.TP 8
+.BI \-V
+Print out the current version and exit.
+.TP 8
+.BI \-x
+Force on hex encoding mode (see NOTES below) and regular XT protocol.  This
+can also be enabled by setting the "DMDLOAD" environment variable to "hex".
+.TP 8
+.BI \-r
+Force regular XT protocol even if the terminal supports network XT protocol.
+Setting the "DMDLOAD" environment variable to "regular" has the same effect.
+.TP 8
+.BI \-s
+Dump XT protocol statistics to stderr after exiting \f2layers\f1
+(similar to \f2xts\f1(1)).
+.TP 8
+.BI \-t
+Dump XT protocol trace circular buffer to stderr after exiting \f2layers\f1
+(similar to \f2xtt\f1(1)).
+.TP 8
+.BI \-l
+Allows attempts to run \f2layers\f1 within a layers window.  Most terminals do
+not support nesting the layers protocol so an accidental invocation of
+\f2layers\f1 within layers without this option will print an error message
+and exit.
+.TP 8
+.BI \-m " max-pkt"
+Specifies the maximum XT packet size that \f2layers\f1 should transmit to the
+terminal when using regular XT protocol.
+\f2max-pkt\f1 must be between 32 and 252.  If the terminal does not
+support the increased packet size, \f2layers\f1 will silently ignore this
+flag and use the default of 32.  If this flag is not specified and the
+terminal supports increased packet sizes, a default is chosen based on
+the baud rate.  Use the "-s" flag or  \f2xts\f1(1) to determine the size
+that \f2layers\f1 actually uses.  Setting the "DMDMAXPKT" environment
+variable to a numeric value has the same effect as setting this flag.
+.TP 8
+.BI \-h " high-water"
+Specifies the high water mark for transmitting to the terminal when using
+network XT protocol with network flow control enabled.  With flow control
+enabled, the high water mark is the maximum number of bytes that
+\f2layers\f1 will transmit before receiving a flow control ack.  When flow
+control is disabled, the maximum size (4096 bytes) is always used.  Flow
+control can be disabled by the terminal at any time; for example, the 730
+terminal disables flow control during a "dmdld" download.  \f2high-water\f1
+must be between 256 and 4096.  The default if this flag is not specified is
+384 bytes.  Use the "-s" flag or  \f2xts\f1(1) to determine the size that
+\f2layers\f1 actually uses.  Setting the "DMDHIGHWATER" environment
+variable to a numeric value has the same effect as setting this flag.
+.TP 8
+.BI \-b " baud"
+Specifies the baud rate that should be used to determine XT protocol timeout
+values and default packet sizes.  
+This flag specifes the baud rate the terminal is running at, overiding the
+baud rate of \f2stty\f1.  This flag can smooth the display of characters
+when going over a network that does not properly propigate the baud rate of
+the connection to the terminal.  Valid baud rates are: 19200, 9600, 4800,
+2400, 1200, and 300.  If this flag is not specified, the value is read from
+\f2stty\f1 but only a maximum of 4800 is believed; thus, you can
+decrease timeouts and increase packet sizes by using this flag to specify a
+baud rate above 4800 even if \f2stty\f1 already claims a higher baud rate.
+.TP 8
+.BI \-f " startupfile"
+Specifies that the file "startupfile" be used as an initial configuration file
+instead of the default "$HOME/.layersrc" file.
+.TP 8
+.BI \-d " debuglevel"
+Enables debugging messages to the debugfile.  "debuglevel" is the sum of
+the following numbers:
+~~~~1: non-protocol errors.
+.br
+~~~~2: low-volume information messages.
+.br
+~~~~4: protocol errors.
+.br
+~~~~8: protocol trace.
+.br
+~~~~16: raw bytes to/from the terminal.
+.br
+~~~~32: high-volume information messages.
+.br
+Add the numbers together to enable those levels.  For example, to enable
+only error messages use "-d5" and to enable all messages use "-d63".
+Each message is timestamped.  Also, each message except for protocol traces
+is stamped with the debug level that the message is for.
+.TP 8
+.BI \-o " debugfile"
+Sets the file for debug messages.  The default is "layers.debug" in 
+the current directory.
+.TP
+.I lsys
+An optional file containing a firmware patch that 
+.I layers
+must download to the terminal before windows are created and before the
+.I startup configuration file 
+is executed. In the vast majority of cases this patch will not be required,
+and it is only supported on 5620 DMD terminals.
+.SH STARTUP FILE COMMANDS
+Each line of the startup file either represents a layer to be
+created, an "agent-like" command or a \f2layers\f1 options mode setting.
+These commands are a superset of the XT-driver \f2layers\f1
+configuration file format and both formats are supported.
+.PP
+The XT-driver \f2layers\f1 commands have the following format:
+.ftCW
+.ti +5
+origin_x origin_y corner_x corner_y command_list
+.ft1
+.PP
+The coordinates specify the upper left and lower right of the window
+on the screen in the terminal's coordinate
+system. If all four are \f20\f1, the user will be prompted to sweep
+the layer interactively (at least on a 630 MTG).
+\f2command_list\f1
+is a list of zero or more commands. If no commands are provided, then
+a shell is executed.
+If commands are provided then they are executed instead.
+The command strings are
+executed in the new window using the user's shell
+(by executing:  \f3\s-1$SHELL\s0 -c "\f2command_list\f3"\f1).
+When the last command has completed,
+the layer will be deleted if the \f2autodelete\f1 option is on.
+.PP
+The expanded commands have the following format:
+.ftCW
+.ti +5
+command options....
+.ft1
+.PP
+The \f2commands\f1 can be used to set option modes, create windows and
+perform many of the hostagent commands semantics (see libwindows(3)).
+The "#" character can be used to place a comment line in file
+if it is placed at the start of a line.
+The valid expanded commands are:
+\f2autodelete\f1, \f2autocurrent\f1, \f2new\f1,
+\f2interactive\f1, \f2command\f1, \f2top\f1,
+\f2bottom\f1, \f2current\f1, \f2reshape\f1, \f2move\f1 and \f2delete\f1.
+.PP
+\f2top\f1, \f2bottom\f1, \f2current\f1, and \f2delete\f1 all have a single
+argument, the layer channel number which is
+to be top, bottom, current or deleted.
+.PP
+\f2autodelete\f1 and \f2autocurrent\f1 have a single argument,
+either \f2on\f1 or \f2off\f1, turning the corresponding option on or off.
+.PP
+\f2new\f1 is the same as a standard XT-driver \f2layers\f1 command
+specification except
+that the keyword \f2new\f1 is prepended to the line; the rest is exactly
+the same.
+.PP
+\f2interactive\f1 is the same as \f2new\f1.
+.PP
+\f2command\f1 is the same as \f2interactive\f1 except that the window is not
+deleted when the last command exits even if the \f2autodelete\f1 option
+is on.
+.PP
+\f2reshape\f1 has five arguments: channel origin_x origin_y corner_x corner_y,
+and reshapes the size of the window specified by \f2channel\f1.
+.PP
+\f2move\f1 has three arguments: channel origin_x origin_y, and moves the window
+specified by \f2channel\f1 to the specified origin.
+.PP
+With the expanded commands in the startup file, it is important to understand
+how the terminals allocate channel numbers that are used
+to identify each window. Channel numbers for
+these commands currently must be in the range from 1 to 7 and are allocated
+in increasing value. Therefore when the terminal creates a new window,
+it allocates a channel number for it by picking the
+lowest unused value in the range of 1 to 7.
+630 MTG terminals always create a channel 1 window when \f2layers\f1 first
+starts to be the same size as the non-layers window. See the 630 MTG manual
+for more details.
+.PP
+The \f2xtagent\f1(f1) program can be used to do many of these same functions.
+.SH STARTUP FILE EXAMPLE
+.nf
+.ft CW
+layers -f startup
+.ft P
+.fi
+.PP
+where
+.B startup
+contains
+.PP
+.nf
+.ft CW
+#
+# layer initialization (for a 630 MTG)
+# This deletes the channel 1 startup window
+# and makes two 24 by 80 windows with the large font
+# and a small clock window
+#
+autodelete on
+autocurrent on
+# channel 2
+new 874 6 1014 170 dmddemo clock
+# channel 3
+new 61 174 970 592
+# channel 4
+new 61 596 970 1014
+delete 1
+current 3
+.ft P
+.fi
+.PP
+In this example three windows will be created (four on a 630, the default
+channel 1 window and the three specified by the new command) when \f2layers\f1
+starts.
+The channel 2 window uploads the demo clock.
+The channel 3 and 4 windows are will have shells running in them.
+The channel 1 startup window will be deleted.
+.SH NOTES
+\f2Layers\f1 supports an alternate
+data transmission scheme known as \s-1ENCODING MODE\s0.
+This mode makes \f2layers\f1 operation possible even
+over data links which intercept control characters or
+do not transmit 8-bit characters.
+\s-1ENCODING MODE\s0 is selected by
+setting a configuration option on your windowing terminal,
+using the \f3-e\f1 option when invoking f2layers\f1, 
+or by setting the environment variable
+\s-1\f3DMDLOAD\f1\s0 to the value \f2hex\f1 before
+running \f2layers\f1.
+.PP
+If the data path from the terminal to the host performs in-band flow
+control (XON/XOFF), you should use encoding mode.  In addition, if
+buffering is so small that XON/XOFF characters get inserted in
+the data stream despite the flow control in the XT protocol, this will
+cause packet corruption and excessive retransmission costs.  If the network
+does this, make sure that you arrange to have this in-band flow control
+disabled otherwise \f2layers\f1 will lock up.
+.SH BUGS
+The 615 MTG has problems with startup files. If windows are created in the
+startup file for a 615 MTG, the 615 MTG firmware turns off the labels on the
+function keys. Startup files on the 615 MTG should not be used if this is
+seen on the firmware on a 615 MTG.
+.SH ENVIRONMENT VARIABLES
+.br
+There are compiled-in defaults for each of these variables:
+.br
+DMD - base directory for layers support files.
+.br
+DMDSYS - alternate base directory for layers support files not
+found under $DMD.
+.br
+DMDLOAD - set to "hex" for encoding mode (same as -x option).  Set to
+"regular" for regular XT (same as -r option).
+.br
+DMDMAXPKT - set to numeric value to change regular XT packet size
+(same as -m option).
+.br
+DMDHIGHWATER - set to numeric value to change network XT high water mark
+(same as -h option).
+.br
+SHELL - shell used in windows.
+.SH AUTHOR
+Keith Muller at the University Of California, San Diego
+.br
+Major modifications by Dave Dykstra at AT&T
+.SH SEE ALSO
+.br
+relogin(1),
+xtagent(1), xtt(1), xts(1),
+libwindows(3), xtproto(5)
+.Ee
