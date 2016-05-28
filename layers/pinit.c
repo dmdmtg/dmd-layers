@@ -13,6 +13,13 @@
 #include	"packets.h"
 #include	"sys/jioctl.h"
 
+#ifdef USE_TERMIOS_H
+#include <sys/termios.h>
+#endif
+#ifdef USE_TERMIO_H
+#include <sys/termio.h>
+#endif
+
 Pch_p		pconvsend;		/* Pointer to end of pconvs */
 Pbyte		pseqtable[2*SEQMOD];	/* Table of sequence numbers */
 
