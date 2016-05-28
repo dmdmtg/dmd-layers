@@ -99,8 +99,8 @@
 #define USE_TERMIOS_H		/* include sys/termios.h */
 #define NO_INDEX		/* use strchr/strrchr instead index/rindex */
 #define NO_BCOPY		/* use memcpy/memset instead of bcopy/bzero */
-#define USE_SYSV_WAIT		/* use system V wait() */
-#define USE_SYSV_SIGNALS	/* no sigblock()/sigsetmask(), etc, use */
+#undef  USE_SYSV_WAIT		/* use system V wait() */
+#undef  USE_SYSV_SIGNALS	/* no sigblock()/sigsetmask(), etc, use */
 				/*   sighold()/sigrelse() instead       */
 
 #define NO_TTYNAMECOMPAT	/* ttyname() is not compatible between OS  */

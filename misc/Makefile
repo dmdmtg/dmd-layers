@@ -14,7 +14,7 @@ CPROGS=ismpx jterm jwin xtagent plabel penter pfkey pmenu
 BINPROGS=$(CPROGS) $(SHPROGS)
 SYSPROGS=grantpt movelogin
 
-all:	$(CPROGS) $(SYSPROGS)
+all:	$(CPROGS) # $(SYSPROGS)
 
 lint:
 
