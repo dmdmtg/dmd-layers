@@ -178,13 +178,13 @@
 #define USE_UNISTD
 #define NO_UT_EXIT
 #define USE_VOID_PUTUTLINE
-#undef USE_SYSV_WAIT
-#undef USE_SYSV_SIGNALS
-#undef USE_PTEM
-#undef NO_TERMIOS
+#define USE_STDARG		/* use stdarg.h instead of varargs.h */
 #ifndef CEOF
 #define CEOF 04			/* workaround a linux header file problem */
 #endif
+#undef USE_TTYDEV
+#undef USE_FILIO
+#undef USE_PTEM
 #endif
 
 #ifdef uts

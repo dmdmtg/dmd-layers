@@ -34,6 +34,35 @@ extern int dmd_maxctrl;
 struct winsize *getwinsize();
 extern int numpcbufs;
 
+static
+makewinsize(lp, bp)
+register struct layer *lp;
+register unsigned char *bp;
+{
+	lp->cols = *bp++;
+	lp->rows = *bp++;
+	lp->xpixels = *bp++;
+	lp->xpixels |= (*bp++)<<8;
+	lp->ypixels = *bp++;
+	lp->ypixels |= (*bp++)<<8;
+	Debug(DEBINFO,"channel %d size %d x %d bytes, %d x %d bits\n",
+		lp - &layer[0], lp->cols, lp->rows, lp->xpixels, lp->ypixels);
+}
+
+struct winsize *
+getwinsize(lp)
+register struct layer *lp;
+{
+	static struct winsize win;
+
+	win.ws_col = lp->cols;
+	win.ws_row = lp->rows;
+	win.ws_xpixel = lp->xpixels;
+	win.ws_ypixel = lp->ypixels;
+
+	return(&win);
+}
+
 control(lay, bp, cc)
 int lay;
 char *bp;
@@ -211,35 +240,6 @@ char jioctl;
 		return(-1);
 	}
 	return(0);
-}
-
-static
-makewinsize(lp, bp)
-register struct layer *lp;
-register unsigned char *bp;
-{
-	lp->cols = *bp++;
-	lp->rows = *bp++;
-	lp->xpixels = *bp++;
-	lp->xpixels |= (*bp++)<<8;
-	lp->ypixels = *bp++;
-	lp->ypixels |= (*bp++)<<8;
-	Debug(DEBINFO,"channel %d size %d x %d bytes, %d x %d bits\n",
-		lp - &layer[0], lp->cols, lp->rows, lp->xpixels, lp->ypixels);
-}
-
-struct winsize *
-getwinsize(lp)
-register struct layer *lp;
-{
-	static struct winsize win;
-
-	win.ws_col = lp->cols;
-	win.ws_row = lp->rows;
-	win.ws_xpixel = lp->xpixels;
-	win.ws_ypixel = lp->ypixels;
-
-	return(&win);
 }
 
 startexit()
