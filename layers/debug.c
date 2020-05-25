@@ -6,17 +6,25 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <time.h>
+#ifdef USE_STDARG
+#include <stdarg.h>
+#else
 #include <varargs.h>
+#endif
 
 extern int DebugLevel;
 extern int DebugTimeout;
 extern FILE *DebugFile;
 
 void
+#ifdef USE_STDARG
+Debug(int level, char *format, ...)
+#else
 Debug(level, format, va_alist)
 int level;
 char *format;
 va_dcl
+#endif
 {
 	va_list args;
 	time_t seconds;
@@ -42,7 +50,11 @@ va_dcl
 			loctime->tm_min, loctime->tm_sec, level);
 	}
 
+#ifdef USE_STDARG
+	va_start(args, format);
+#else
 	va_start(args);
+#endif
 	(void) vfprintf(DebugFile, format, args);
 	va_end(args);
 

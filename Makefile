@@ -22,7 +22,7 @@ DEFDMDSYS=$(DEFDMD)
 # EXTRACFLAGS are extra flags to pass to every $(CC) command
 ###############################################################################
 #
-EXTRACFLAGS=-O
+#EXTRACFLAGS=-O
 # Use the following to link with static libraries
 #EXTRACFLAGS=-O -Bstatic
 # Use the following for Solaris 2.0 or later:
@@ -32,7 +32,7 @@ EXTRACFLAGS=-O
 # Use this for Mips Risc/OS:
 #EXTRACFLAGS=-O -I/usr/include -I/usr/include/bsd -lc -lbsd
 # Use this for Linux:
-#EXTRACFLAGS=-O -DNO_SYSVR4LIKE -I/usr/include -I/usr/include/bsd -lbsd
+EXTRACFLAGS=-O -w -Dconst=
 # Use this for HP-UX:
 #EXTRACFLAGS=-O -lV3
 # Use this for UnixWare 2.01 or later:

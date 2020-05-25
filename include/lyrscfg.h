@@ -27,7 +27,7 @@
 #endif
 
 
-#if (vax || i386)
+#if (vax || i386 || __x86_64__)
 #define USE_LITTLEENDIAN	/* host is little endian byte order */
 #endif
 
@@ -41,7 +41,7 @@
  *  in the "#if".
  */
 
-#if (i386 || mips || hppa || u3b2 || u3b || uts || pyr || vax || alliant)
+#if (i386 || __x86_64__ || mips || hppa || u3b2 || u3b || uts || pyr || vax || alliant)
 
 #define USE_NAMED_PIPE		/* use named pipes instead of sockets */
 
@@ -57,13 +57,13 @@
 
 #ifndef NO_SYSVLIKE
 
-#if (i386 || mips || hppa || u3b2 || u3b || uts || pyr || vax || alliant)
+#if (i386 || __x86_64__ || mips || hppa || u3b2 || u3b || uts || pyr || vax || alliant)
 #ifndef USE_SYSVLIKE
 #define USE_SYSVLIKE
 #endif
 #endif
 
-#if (i386)
+#if (i386 || __x86_64__)
 #if (!defined(USE_SYSVR4LIKE) && !defined(NO_SYSVR4LIKE))
 #define USE_SYSVR4LIKE
 #endif
@@ -164,7 +164,7 @@
 #define USE_ALT_PTYALLOC
 #endif
 
-#if (u3b2 || i386)
+#if (u3b2 || i386 || __x86_64__)
 #define USE_PTEM		/* include sys/ptem.h to get struct winsize */
 #endif
 
@@ -173,18 +173,17 @@
 #endif
 
 #if (linux)
-/* assumes NO_SYSVR4LIKE is defined by the Makefile */
 #define USE_DIRENT
 #define USE_UNISTD
 #define NO_UT_EXIT
 #define USE_VOID_PUTUTLINE
-#undef USE_SYSV_WAIT
-#undef USE_SYSV_SIGNALS
-#undef USE_PTEM
-#undef NO_TERMIOS
+#define USE_STDARG		/* use stdarg.h instead of varargs.h */
 #ifndef CEOF
 #define CEOF 04			/* workaround a linux header file problem */
 #endif
+#undef USE_TTYDEV
+#undef USE_FILIO
+#undef USE_PTEM
 #endif
 
 #ifdef uts

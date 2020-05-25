@@ -98,7 +98,13 @@ char **argv;
 	 *   show people logged on to the wrong /dev/ device which would
 	 *   only be a very minor breach of security.
 	 */
+#ifndef USE_PTMX
+	/*
+	 * Sometimes /dev/ptmx only allocates without creating
+	 * so skip check of frompty.
+	 */
 	checkaccess(fromtty, 0, "cannot access");
+#endif
 	checkaccess(totty, 0, "cannot access");
 
 	rethost = moveutmp(fromtty, totty, hostname);

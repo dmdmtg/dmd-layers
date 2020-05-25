@@ -191,6 +191,7 @@ flush_write()
 
 int
 buf_write(fd, buf, nbytes)
+char *buf;
 {
 	Debug(DEBDETAIL, "buf_write (%d %x %d)\n", fd, buf, nbytes);
 	if (fd != writefd) {
